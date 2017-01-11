@@ -30,23 +30,23 @@
 
 import UIKit
 
-public class ScrollPageView: UIView {
+open class ScrollPageView: UIView {
     static let cellId = "cellId"
-    private var segmentStyle = SegmentStyle()
+    fileprivate var segmentStyle = SegmentStyle()
     /// 附加按钮点击响应
-    public var extraBtnOnClick: ((extraBtn: UIButton) -> Void)? {
+    open var extraBtnOnClick: ((_ extraBtn: UIButton) -> Void)? {
         didSet {
             segView.extraBtnOnClick = extraBtnOnClick
         }
     }
     
-    private var segView: ScrollSegmentView!
-    private var contentView: ContentView!
-    private var titlesArray: [String] = []
+    fileprivate var segView: ScrollSegmentView!
+    fileprivate var contentView: ContentView!
+    fileprivate var titlesArray: [String] = []
     /// 所有的子控制器
-    private var childVcs: [UIViewController] = []
+    fileprivate var childVcs: [UIViewController] = []
     // 这里使用weak避免循环引用
-    private weak var parentViewController: UIViewController?
+    fileprivate weak var parentViewController: UIViewController?
 
     public init(frame:CGRect, segmentStyle: SegmentStyle, titles: [String], childVcs:[UIViewController], parentViewController: UIViewController) {
         self.parentViewController = parentViewController
@@ -62,13 +62,13 @@ public class ScrollPageView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func commonInit() {
-        backgroundColor = UIColor.whiteColor()
+    fileprivate func commonInit() {
+        backgroundColor = UIColor.white
         segView = ScrollSegmentView(frame: CGRect(x: 0, y: 0, width: bounds.size.width, height: 44), segmentStyle: segmentStyle, titles: titlesArray)
         
         guard let parentVc = parentViewController else { return }
         
-        contentView = ContentView(frame: CGRect(x: 0, y: CGRectGetMaxY(segView.frame), width: bounds.size.width, height: bounds.size.height - 44), childVcs: childVcs, parentViewController: parentVc)
+        contentView = ContentView(frame: CGRect(x: 0, y: segView.frame.maxY, width: bounds.size.width, height: bounds.size.height - 44), childVcs: childVcs, parentViewController: parentVc)
         contentView.delegate = self
         
         addSubview(segView)
@@ -94,7 +94,7 @@ public class ScrollPageView: UIView {
 extension ScrollPageView {
     
     /// 给外界设置选中的下标的方法(public method to set currentIndex)
-    public func selectedIndex(selectedIndex: Int, animated: Bool) {
+    public func selectedIndex(_ selectedIndex: Int, animated: Bool) {
         // 移动滑块的位置
         segView.selectedIndex(selectedIndex, animated: animated)
         
@@ -104,7 +104,7 @@ extension ScrollPageView {
     /// (public method to reset childVcs)
     ///  - parameter titles:      newTitles
     ///  - parameter newChildVcs: newChildVcs
-    public func reloadChildVcsWithNewTitles(titles: [String], andNewChildVcs newChildVcs: [UIViewController]) {
+    public func reloadChildVcsWithNewTitles(_ titles: [String], andNewChildVcs newChildVcs: [UIViewController]) {
         self.childVcs = newChildVcs
         self.titlesArray = titles
         

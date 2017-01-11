@@ -35,7 +35,7 @@ class PageTableViewController: PageViewController {
     
     //
     lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: self.view.bounds, style: .Plain)
+        let tableView = UITableView(frame: self.view.bounds, style: .plain)
         tableView.delegate = self
         tableView.dataSource = self
         return tableView
@@ -58,18 +58,18 @@ class PageTableViewController: PageViewController {
 extension PageTableViewController: UITableViewDelegate, UITableViewDataSource {
     // MARK: - Table view data source
     
-     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+     func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 1
     }
     
-     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return 100
     }
     
-     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .Default, reuseIdentifier: "cellId")
+     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "cellId")
         cell.textLabel?.text = "--------ceshishishihi\(indexPath.row)"
         
         return cell

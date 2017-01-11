@@ -35,88 +35,88 @@ class Vc10Controller: UIViewController {
 
     // 首先生成所有的allChildVcs 和对应的title
     lazy var allChildVcs: [UIViewController] = {
-        let vc1 = self.storyboard!.instantiateViewControllerWithIdentifier("test")
+        let vc1 = self.storyboard!.instantiateViewController(withIdentifier: "test")
         vc1.title = "国内头条"
         
         let vc2 = UIViewController()
-        vc2.view.backgroundColor = UIColor.greenColor()
+        vc2.view.backgroundColor = UIColor.green
         vc2.title = "国际要闻"
         
         let vc3 = UIViewController()
-        vc3.view.backgroundColor = UIColor.redColor()
+        vc3.view.backgroundColor = UIColor.red
         vc3.title = "趣事"
         
         let vc4 = UIViewController()
-        vc4.view.backgroundColor = UIColor.yellowColor()
+        vc4.view.backgroundColor = UIColor.yellow
         vc4.title = "囧图"
         
         let vc5 = UIViewController()
-        vc5.view.backgroundColor = UIColor.lightGrayColor()
+        vc5.view.backgroundColor = UIColor.lightGray
         vc5.title = "明星八卦"
         
         let vc6 = UIViewController()
-        vc6.view.backgroundColor = UIColor.brownColor()
+        vc6.view.backgroundColor = UIColor.brown
         vc6.title = "爱车"
         
         let vc7 = UIViewController()
-        vc7.view.backgroundColor = UIColor.orangeColor()
+        vc7.view.backgroundColor = UIColor.orange
         vc7.title = "国防要事"
         
         let vc8 = UIViewController()
-        vc8.view.backgroundColor = UIColor.blueColor()
+        vc8.view.backgroundColor = UIColor.blue
         vc8.title = "科技频道"
         
         let vc9 = UIViewController()
-        vc9.view.backgroundColor = UIColor.brownColor()
+        vc9.view.backgroundColor = UIColor.brown
         vc9.title = "手机专页"
         
         let vc10 = UIViewController()
-        vc10.view.backgroundColor = UIColor.orangeColor()
+        vc10.view.backgroundColor = UIColor.orange
         vc10.title = "风景图"
         
         let vc11 = UIViewController()
-        vc11.view.backgroundColor = UIColor.blueColor()
+        vc11.view.backgroundColor = UIColor.blue
         vc11.title = "段子"
         
         
         let vc12 = UIViewController()
-        vc12.view.backgroundColor = UIColor.greenColor()
+        vc12.view.backgroundColor = UIColor.green
         vc12.title = "美女"
         
         let vc13 = UIViewController()
-        vc13.view.backgroundColor = UIColor.redColor()
+        vc13.view.backgroundColor = UIColor.red
         vc13.title = "体育"
         
         let vc14 = UIViewController()
-        vc14.view.backgroundColor = UIColor.yellowColor()
+        vc14.view.backgroundColor = UIColor.yellow
         vc14.title = "热点"
         
         let vc15 = UIViewController()
-        vc15.view.backgroundColor = UIColor.lightGrayColor()
+        vc15.view.backgroundColor = UIColor.lightGray
         vc15.title = "财经"
         
         let vc16 = UIViewController()
-        vc16.view.backgroundColor = UIColor.brownColor()
+        vc16.view.backgroundColor = UIColor.brown
         vc16.title = "时尚"
         
         let vc17 = UIViewController()
-        vc17.view.backgroundColor = UIColor.orangeColor()
+        vc17.view.backgroundColor = UIColor.orange
         vc17.title = "房产"
         
         let vc18 = UIViewController()
-        vc18.view.backgroundColor = UIColor.blueColor()
+        vc18.view.backgroundColor = UIColor.blue
         vc18.title = "独家"
         
         let vc19 = UIViewController()
-        vc19.view.backgroundColor = UIColor.brownColor()
+        vc19.view.backgroundColor = UIColor.brown
         vc19.title = "中国足球"
         
         let vc20 = UIViewController()
-        vc20.view.backgroundColor = UIColor.orangeColor()
+        vc20.view.backgroundColor = UIColor.orange
         vc20.title = "社会"
         
         let vc21 = UIViewController()
-        vc21.view.backgroundColor = UIColor.blueColor()
+        vc21.view.backgroundColor = UIColor.blue
         vc21.title = "历史"
         
         return [vc1, vc2, vc3,vc4, vc5, vc6, vc7, vc8, vc9, vc10, vc11, vc12, vc13,vc14, vc15, vc16, vc17, vc18, vc19, vc20, vc21]
@@ -138,7 +138,7 @@ class Vc10Controller: UIViewController {
         // 颜色渐变
         style.gradualChangeTitleColor = true
         // 遮盖颜色
-        style.coverBackgroundColor = UIColor.lightGrayColor()
+        style.coverBackgroundColor = UIColor.lightGray
         
         /// 显示附加按钮
         style.showExtraButton = true
@@ -188,7 +188,7 @@ class Vc10Controller: UIViewController {
     }
     
     // 重新设置ChildVcs
-    func resetChildVcs(newTitles: [String]) {
+    func resetChildVcs(_ newTitles: [String]) {
         currentChildVcs = newTitles.map { (newTitle) -> UIViewController in
             // 通过遍历相应的title得到对应的UIViewController
             for childVc in self.allChildVcs {
@@ -204,46 +204,46 @@ class Vc10Controller: UIViewController {
     }
     
     func setChildVcs() -> [UIViewController] {
-        let vc1 = storyboard!.instantiateViewControllerWithIdentifier("test")
+        let vc1 = storyboard!.instantiateViewController(withIdentifier: "test")
         vc1.title = "国内头条"
         let vc2 = UIViewController()
-        vc2.view.backgroundColor = UIColor.greenColor()
+        vc2.view.backgroundColor = UIColor.green
         vc2.title = "国际要闻"
 
         let vc3 = UIViewController()
-        vc3.view.backgroundColor = UIColor.redColor()
+        vc3.view.backgroundColor = UIColor.red
         vc3.title = "趣事"
 
         let vc4 = UIViewController()
-        vc4.view.backgroundColor = UIColor.yellowColor()
+        vc4.view.backgroundColor = UIColor.yellow
         vc4.title = "囧图"
 
         let vc5 = UIViewController()
-        vc5.view.backgroundColor = UIColor.lightGrayColor()
+        vc5.view.backgroundColor = UIColor.lightGray
         vc5.title = "明星八卦"
 
         let vc6 = UIViewController()
-        vc6.view.backgroundColor = UIColor.brownColor()
+        vc6.view.backgroundColor = UIColor.brown
         vc6.title = "爱车"
 
         let vc7 = UIViewController()
-        vc7.view.backgroundColor = UIColor.orangeColor()
+        vc7.view.backgroundColor = UIColor.orange
         vc7.title = "国防要事"
 
         let vc8 = UIViewController()
-        vc8.view.backgroundColor = UIColor.blueColor()
+        vc8.view.backgroundColor = UIColor.blue
         vc8.title = "科技频道"
 
         let vc9 = UIViewController()
-        vc9.view.backgroundColor = UIColor.brownColor()
+        vc9.view.backgroundColor = UIColor.brown
         vc9.title = "手机专页"
 
         let vc10 = UIViewController()
-        vc10.view.backgroundColor = UIColor.orangeColor()
+        vc10.view.backgroundColor = UIColor.orange
         vc10.title = "风景图"
 
         let vc11 = UIViewController()
-        vc11.view.backgroundColor = UIColor.blueColor()
+        vc11.view.backgroundColor = UIColor.blue
         vc11.title = "段子"
 
         return [vc1, vc2, vc3,vc4, vc5, vc6, vc7, vc8, vc9, vc10, vc11]

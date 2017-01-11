@@ -50,7 +50,7 @@ class Vc6Controller: UIViewController {
         // 遮盖
         style.showCover = true
         // 遮盖颜色
-        style.coverBackgroundColor = UIColor.whiteColor()
+        style.coverBackgroundColor = UIColor.white
                 
         // title正常状态颜色 使用RGB空间值
         style.normalTitleColor = UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 1.0)
@@ -62,7 +62,7 @@ class Vc6Controller: UIViewController {
         }
 
         topView = ScrollSegmentView(frame: CGRect(x: 0, y: 0, width: 150, height: 28), segmentStyle: style, titles: titles)
-        topView.backgroundColor = UIColor.redColor()
+        topView.backgroundColor = UIColor.red
         topView.layer.cornerRadius = 14.0
         // 可以直接设置背景色
         //        topView.backgroundImage = UIImage(named: "test")
@@ -81,21 +81,21 @@ class Vc6Controller: UIViewController {
         
         // 用于测试刷新视图
         let btn = UIButton(frame: CGRect(x: 100, y: 300, width: 100, height: 44))
-        btn.setTitleColor(UIColor.blackColor(), forState: .Normal)
-        btn.setTitle("测试刷新", forState: .Normal)
-        btn.addTarget(self, action: #selector(self.reloadChildVcs), forControlEvents: .TouchUpInside)
+        btn.setTitleColor(UIColor.black, for: UIControlState())
+        btn.setTitle("测试刷新", for: UIControlState())
+        btn.addTarget(self, action: #selector(self.reloadChildVcs), for: .touchUpInside)
         view.addSubview(btn)
     }
     
     func reloadChildVcs() {
         
         // 设置新的childVcs
-        let vc1 = storyboard!.instantiateViewControllerWithIdentifier("test")
-        vc1.view.backgroundColor = UIColor.redColor()
+        let vc1 = storyboard!.instantiateViewController(withIdentifier: "test")
+        vc1.view.backgroundColor = UIColor.red
         vc1.title = "更换标题"
 
         let vc2 = UIViewController()
-        vc2.view.backgroundColor = UIColor.greenColor()
+        vc2.view.backgroundColor = UIColor.green
         vc2.title = "换标题2"
 
         let newChildVcs = [vc1, vc2]
@@ -110,12 +110,12 @@ class Vc6Controller: UIViewController {
     
     // 设置childVcs
     func setChildVcs()  -> [UIViewController]{
-        let vc1 = storyboard!.instantiateViewControllerWithIdentifier("test")
-        vc1.view.backgroundColor = UIColor.whiteColor()
+        let vc1 = storyboard!.instantiateViewController(withIdentifier: "test")
+        vc1.view.backgroundColor = UIColor.white
         vc1.title = "国内头条"
         
         let vc2 = UIViewController()
-        vc2.view.backgroundColor = UIColor.greenColor()
+        vc2.view.backgroundColor = UIColor.green
         vc2.title = "国际头条"
 
         return [vc1, vc2]

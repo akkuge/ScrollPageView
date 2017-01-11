@@ -31,15 +31,15 @@
 import UIKit
 
 
-public class CustomGestureCollectionView: UICollectionView {
+open class CustomGestureCollectionView: UICollectionView {
     
-    var panGestureShouldBeginClosure: ((panGesture: UIPanGestureRecognizer, collectionView: CustomGestureCollectionView) -> Bool)?
-    func setupPanGestureShouldBeginClosure(closure: (panGesture: UIPanGestureRecognizer, collectionView: CustomGestureCollectionView) -> Bool) {
+    var panGestureShouldBeginClosure: ((_ panGesture: UIPanGestureRecognizer, _ collectionView: CustomGestureCollectionView) -> Bool)?
+    func setupPanGestureShouldBeginClosure(_ closure: @escaping (_ panGesture: UIPanGestureRecognizer, _ collectionView: CustomGestureCollectionView) -> Bool) {
         panGestureShouldBeginClosure = closure
     }
-    override public func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
+    override open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if let panGestureShouldBeginClosure = panGestureShouldBeginClosure, let panGesture = gestureRecognizer as? UIPanGestureRecognizer {
-            return panGestureShouldBeginClosure(panGesture: panGesture, collectionView: self)
+            return panGestureShouldBeginClosure(panGesture, self)
         }
         else {
             return super.gestureRecognizerShouldBegin(gestureRecognizer)
@@ -47,30 +47,30 @@ public class CustomGestureCollectionView: UICollectionView {
     }
 }
 
-public class ContentView: UIView {
+open class ContentView: UIView {
     static let cellId = "cellId"
     
     /// 所有的子控制器
-    private var childVcs: [UIViewController] = []
+    fileprivate var childVcs: [UIViewController] = []
     /// 用来判断是否是点击了title, 点击了就不要调用scrollview的代理来进行相关的计算
-    private var forbidTouchToAdjustPosition = false
+    fileprivate var forbidTouchToAdjustPosition = false
     /// 用来记录开始滚动的offSetX
-    private var oldOffSetX:CGFloat = 0.0
-    private var oldIndex = 0
-    private var currentIndex = 1
+    fileprivate var oldOffSetX:CGFloat = 0.0
+    fileprivate var oldIndex = 0
+    fileprivate var currentIndex = 1
     
     // 这里使用weak 避免循环引用
-    private weak var parentViewController: UIViewController?
-    public weak var delegate: ContentViewDelegate?
+    fileprivate weak var parentViewController: UIViewController?
+    open weak var delegate: ContentViewDelegate?
     
-    private(set) lazy var collectionView: CustomGestureCollectionView = {[weak self] in
+    fileprivate(set) lazy var collectionView: CustomGestureCollectionView = {[weak self] in
         let flowLayout = UICollectionViewFlowLayout()
         
-        let collection = CustomGestureCollectionView(frame: CGRectZero, collectionViewLayout: flowLayout)
+        let collection = CustomGestureCollectionView(frame: CGRect.zero, collectionViewLayout: flowLayout)
         
         if let strongSelf = self {
             flowLayout.itemSize = strongSelf.bounds.size
-            flowLayout.scrollDirection = .Horizontal
+            flowLayout.scrollDirection = .horizontal
             flowLayout.minimumLineSpacing = 0
             flowLayout.minimumInteritemSpacing = 0
             
@@ -79,11 +79,11 @@ public class ContentView: UIView {
             collection.showsHorizontalScrollIndicator = false
             collection.frame = strongSelf.bounds
             collection.collectionViewLayout = flowLayout
-            collection.pagingEnabled = true
+            collection.isPagingEnabled = true
             // 如果不设置代理, 将不会调用scrollView的delegate方法
             collection.delegate = strongSelf
             collection.dataSource = strongSelf
-            collection.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: ContentView.cellId)
+            collection.register(UICollectionViewCell.self, forCellWithReuseIdentifier: ContentView.cellId)
         }
         return collection
     }()
@@ -103,37 +103,37 @@ public class ContentView: UIView {
     }
     
     
-    private func commonInit() {
+    fileprivate func commonInit() {
         
         // 不要添加navigationController包装后的子控制器
         for childVc in childVcs {
-            if childVc.isKindOfClass(UINavigationController.self) {
+            if childVc.isKind(of: UINavigationController.self) {
                 fatalError("不要添加UINavigationController包装后的子控制器")
             }
             parentViewController?.addChildViewController(childVc)
         }
-        collectionView.backgroundColor = UIColor.clearColor()
+        collectionView.backgroundColor = UIColor.clear
         collectionView.frame = bounds
         
         // 在这里调用了懒加载的collectionView, 那么之前设置的self.frame将会用于collectionView,如果在layoutsubviews()里面没有相关的处理frame的操作, 那么将导致内容显示不正常
         addSubview(collectionView)
         
         // 设置naviVVc手势代理, 处理pop手势
-        if let naviParentViewController = self.parentViewController?.parentViewController as? UINavigationController {
+        if let naviParentViewController = self.parentViewController?.parent as? UINavigationController {
             if naviParentViewController.viewControllers.count == 1 { return }
             collectionView.setupPanGestureShouldBeginClosure({[weak self] (panGesture, collectionView) -> Bool in
                 
                 let strongSelf = self
                 guard let `self` = strongSelf else { return false}
 
-                let transionX = panGesture.velocityInView(panGesture.view).x
+                let transionX = panGesture.velocity(in: panGesture.view).x
                 
                 if collectionView.contentOffset.x == 0 && transionX > 0 {
-                    naviParentViewController.interactivePopGestureRecognizer?.enabled = true
+                    naviParentViewController.interactivePopGestureRecognizer?.isEnabled = true
 
                 }
                 else {
-                    naviParentViewController.interactivePopGestureRecognizer?.enabled = false
+                    naviParentViewController.interactivePopGestureRecognizer?.isEnabled = false
 
                 }
                 return  self.delegate?.contentViewShouldBeginPanGesture(panGesture, collectionView: collectionView) ?? true
@@ -144,12 +144,12 @@ public class ContentView: UIView {
     }
     
     // 发布通知
-    private func addCurrentShowIndexNotification(index: Int) {
-        NSNotificationCenter.defaultCenter().postNotificationName(ScrollPageViewDidShowThePageNotification, object: nil, userInfo: ["currentIndex": index])
+    fileprivate func addCurrentShowIndexNotification(_ index: Int) {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: ScrollPageViewDidShowThePageNotification), object: nil, userInfo: ["currentIndex": index])
         
     }
     
-    override public func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         collectionView.frame = bounds
         let  vc = childVcs[currentIndex]
@@ -167,7 +167,7 @@ public class ContentView: UIView {
 extension ContentView {
     
     // 给外界可以设置ContentOffSet的方法(public method to set contentOffSet)
-    public func setContentOffSet(offSet: CGPoint , animated: Bool) {
+    public func setContentOffSet(_ offSet: CGPoint , animated: Bool) {
         // 不要执行collectionView的scrollView的滚动代理方法
         self.forbidTouchToAdjustPosition = true
         //这里开始滚动
@@ -177,11 +177,11 @@ extension ContentView {
     }
     
     // 给外界刷新视图的方法(public method to reset childVcs)
-    public func reloadAllViewsWithNewChildVcs(newChildVcs: [UIViewController] ) {
+    public func reloadAllViewsWithNewChildVcs(_ newChildVcs: [UIViewController] ) {
         
         // removing the old childVcs
         childVcs.forEach { (childVc) in
-            childVc.willMoveToParentViewController(nil)
+            childVc.willMove(toParentViewController: nil)
             childVc.view.removeFromSuperview()
             childVc.removeFromParentViewController()
         }
@@ -191,7 +191,7 @@ extension ContentView {
         // don't add the childVc that wrapped by the navigationController
         // 不要添加navigationController包装后的子控制器
         for childVc in childVcs {
-            if childVc.isKindOfClass(UINavigationController.self) {
+            if childVc.isKind(of: UINavigationController.self) {
                 fatalError("不要添加UINavigationController包装后的子控制器")
             }
             // add childVc
@@ -210,12 +210,12 @@ extension ContentView {
 //MARK:- UICollectionViewDelegate, UICollectionViewDataSource
 extension ContentView: UICollectionViewDelegate, UICollectionViewDataSource {
     
-    final public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    final public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return childVcs.count
     }
     
-    final public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(ContentView.cellId, forIndexPath: indexPath)
+    final public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ContentView.cellId, for: indexPath)
         // 避免出现重用显示内容出错 ---- 也可以直接给每个cell用不同的reuseIdentifier实现
         // avoid to the case that shows the wrong thing due to the collectionViewCell's reuse
         for subview in cell.contentView.subviews {
@@ -225,7 +225,7 @@ extension ContentView: UICollectionViewDelegate, UICollectionViewDataSource {
         vc.view.frame = bounds
         cell.contentView.addSubview(vc.view)
         // finish buildding the parent-child relationship
-        vc.didMoveToParentViewController(parentViewController)
+        vc.didMove(toParentViewController: parentViewController)
         // 发布将要显示的index
         addCurrentShowIndexNotification(indexPath.row)
         return cell
@@ -237,7 +237,7 @@ extension ContentView: UICollectionViewDelegate, UICollectionViewDataSource {
 // MARK: - UIScrollViewDelegate
 extension ContentView: UIScrollViewDelegate {
     // update UI
-    final public func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+    final public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let currentIndex = Int(floor(scrollView.contentOffset.x / bounds.size.width))
 //        print("减速完成")
 //        if self.currentIndex == currentIndex {// finish scrolling to next page
@@ -254,15 +254,15 @@ extension ContentView: UIScrollViewDelegate {
     }
     
     // 代码调整contentOffSet但是没有动画的时候不会调用这个
-    final public func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
+    final public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         delegate?.contentViewDidEndDisPlay(collectionView)
 
     }
     
-    final public func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    final public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         let currentIndex = Int(floor(scrollView.contentOffset.x / bounds.size.width))
-        if let naviParentViewController = self.parentViewController?.parentViewController as? UINavigationController {
-            naviParentViewController.interactivePopGestureRecognizer?.enabled = true
+        if let naviParentViewController = self.parentViewController?.parent as? UINavigationController {
+            naviParentViewController.interactivePopGestureRecognizer?.isEnabled = true
 
         }
         delegate?.contentViewDidEndDrag(scrollView)
@@ -276,7 +276,7 @@ extension ContentView: UIScrollViewDelegate {
     }
     
     // 手指开始拖的时候, 记录此时的offSetX, 并且表示不是点击title切换的内容(remenber the begin offsetX)
-    final public func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+    final public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         /// 用来判断方向
         oldOffSetX = scrollView.contentOffset.x
         delegate?.contentViewDidBeginMove(collectionView)
@@ -285,7 +285,7 @@ extension ContentView: UIScrollViewDelegate {
     }
     
     // 需要实时更新滚动的进度和移动的方向及下标 以便于外部使用 (compute the index and progress)
-    final public func scrollViewDidScroll(scrollView: UIScrollView) {
+    final public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offSetX = scrollView.contentOffset.x
         // 如果是点击了title, 就不要计算了, 直接在点击相应的方法里就已经处理了滚动
         if forbidTouchToAdjustPosition {
@@ -327,49 +327,49 @@ extension ContentView: UIScrollViewDelegate {
 
 public protocol ContentViewDelegate: class {
     /// 有默认实现, 不推荐重写(override is not recommoned)
-    func contentViewMoveToIndex(fromIndex: Int, toIndex: Int, progress: CGFloat)
+    func contentViewMoveToIndex(_ fromIndex: Int, toIndex: Int, progress: CGFloat)
     /// 有默认实现, 不推荐重写(override is not recommoned)
-    func contentViewDidEndMoveToIndex(fromIndex: Int , toIndex: Int)
-    func contentViewShouldBeginPanGesture(panGesture: UIPanGestureRecognizer , collectionView: CustomGestureCollectionView) -> Bool;
+    func contentViewDidEndMoveToIndex(_ fromIndex: Int , toIndex: Int)
+    func contentViewShouldBeginPanGesture(_ panGesture: UIPanGestureRecognizer , collectionView: CustomGestureCollectionView) -> Bool;
 
-    func contentViewDidBeginMove(scrollView: UIScrollView)
+    func contentViewDidBeginMove(_ scrollView: UIScrollView)
     
-    func contentViewIsScrolling(scrollView: UIScrollView)
-    func contentViewDidEndDisPlay(scrollView: UIScrollView)
+    func contentViewIsScrolling(_ scrollView: UIScrollView)
+    func contentViewDidEndDisPlay(_ scrollView: UIScrollView)
     
-    func contentViewDidEndDrag(scrollView: UIScrollView)
+    func contentViewDidEndDrag(_ scrollView: UIScrollView)
     /// 必须提供的属性
     var segmentView: ScrollSegmentView { get }
 }
 
 // 由于每个遵守这个协议的都需要执行些相同的操作, 所以直接使用协议扩展统一完成,协议遵守者只需要提供segmentView即可
 extension ContentViewDelegate {
-    public func contentViewDidEndDrag(scrollView: UIScrollView) {
+    public func contentViewDidEndDrag(_ scrollView: UIScrollView) {
         
     }
-    public func contentViewDidEndDisPlay(scrollView: UIScrollView) {
+    public func contentViewDidEndDisPlay(_ scrollView: UIScrollView) {
         
     }
-    public func contentViewIsScrolling(scrollView: UIScrollView) {
+    public func contentViewIsScrolling(_ scrollView: UIScrollView) {
         
     }
     // 默认什么都不做
-    public func contentViewDidBeginMove(scrollView: UIScrollView) {
+    public func contentViewDidBeginMove(_ scrollView: UIScrollView) {
         
     }
-    public func contentViewShouldBeginPanGesture(panGesture: UIPanGestureRecognizer , collectionView: CustomGestureCollectionView) -> Bool {
+    public func contentViewShouldBeginPanGesture(_ panGesture: UIPanGestureRecognizer , collectionView: CustomGestureCollectionView) -> Bool {
         return true
     }
     
     
     // 内容每次滚动完成时调用, 确定title和其他的控件的位置
-    public func contentViewDidEndMoveToIndex(fromIndex: Int , toIndex: Int) {
+    public func contentViewDidEndMoveToIndex(_ fromIndex: Int , toIndex: Int) {
         segmentView.adjustTitleOffSetToCurrentIndex(toIndex)
         segmentView.adjustUIWithProgress(1.0, oldIndex: fromIndex, currentIndex: toIndex)
     }
     
     // 内容正在滚动的时候,同步滚动滑块的控件
-    public func contentViewMoveToIndex(fromIndex: Int, toIndex: Int, progress: CGFloat) {
+    public func contentViewMoveToIndex(_ fromIndex: Int, toIndex: Int, progress: CGFloat) {
         segmentView.adjustUIWithProgress(progress, oldIndex: fromIndex, currentIndex: toIndex)
     }
 }

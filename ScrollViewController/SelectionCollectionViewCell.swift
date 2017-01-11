@@ -29,12 +29,12 @@
 
 import UIKit
 enum SelectionBtnState {
-    case Normal
-    case Selected
+    case normal
+    case selected
 }
 class SelectionCollectionViewCell: UICollectionViewCell {
     
-    typealias BtnAction = (btn: UIButton) -> Void
+    typealias BtnAction = (_ btn: UIButton) -> Void
 
     @IBOutlet weak var deleteBtn: UIButton!
 
@@ -42,41 +42,41 @@ class SelectionCollectionViewCell: UICollectionViewCell {
     var selectedAction: BtnAction?
     var deleteAction: BtnAction?
     
-    @IBAction func deletebtnOnClick(sender: UIButton) {
-        deleteAction?(btn: sender)
+    @IBAction func deletebtnOnClick(_ sender: UIButton) {
+        deleteAction?(sender)
     }
     
-    @IBAction func selectionBtnOnClick(sender: UIButton) {
-        selectedAction?(btn: sender)
+    @IBAction func selectionBtnOnClick(_ sender: UIButton) {
+        selectedAction?(sender)
     }
     
     var title: String = "" {
         didSet {
-            selectionBtn.setTitle(title, forState: .Normal)
+            selectionBtn.setTitle(title, for: UIControlState())
         }
     }
-    var state: SelectionBtnState = .Normal {
+    var state: SelectionBtnState = .normal {
         didSet {
             switch state {
-            case .Normal:
-                deleteBtn.hidden = true
+            case .normal:
+                deleteBtn.isHidden = true
             default:
-                deleteBtn.hidden = false
+                deleteBtn.isHidden = false
             }
         }
     }
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        deleteBtn.hidden = true
-        selectionBtn.setBackgroundImage(resizeImage(), forState: .Normal)
+        deleteBtn.isHidden = true
+        selectionBtn.setBackgroundImage(resizeImage(), for: UIControlState())
         selectionBtn.adjustsImageWhenHighlighted = false
     }
     
     func resizeImage() -> UIImage {
         var image = UIImage(named: "channel_grid_circle")!
         let inset = UIEdgeInsets(top: 15.0, left: 10.0, bottom: 15.0, right: 10.0)
-        image = image.resizableImageWithCapInsets(inset, resizingMode: .Stretch)
+        image = image.resizableImage(withCapInsets: inset, resizingMode: .stretch)
         return image
     }
 

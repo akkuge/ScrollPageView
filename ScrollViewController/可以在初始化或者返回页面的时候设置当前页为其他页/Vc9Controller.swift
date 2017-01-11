@@ -64,49 +64,49 @@ class Vc9Controller: UIViewController {
         scrollPageView.frame = CGRect(x: 0, y: 64, width: view.bounds.size.width, height: view.bounds.size.height - 64)
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print(navigationController?.interactivePopGestureRecognizer)
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         print(navigationController?.interactivePopGestureRecognizer)
 
     }
     
     func setChildVcs() -> [UIViewController] {
-        let vc1 = storyboard!.instantiateViewControllerWithIdentifier("test")
+        let vc1 = storyboard!.instantiateViewController(withIdentifier: "test")
         
         let vc2 = UIViewController()
-        vc2.view.backgroundColor = UIColor.greenColor()
+        vc2.view.backgroundColor = UIColor.green
         
         let vc3 = UIViewController()
-        vc3.view.backgroundColor = UIColor.redColor()
+        vc3.view.backgroundColor = UIColor.red
         
-        let vc4 = storyboard!.instantiateViewControllerWithIdentifier("test")
-        vc4.view.backgroundColor = UIColor.yellowColor()
+        let vc4 = storyboard!.instantiateViewController(withIdentifier: "test")
+        vc4.view.backgroundColor = UIColor.yellow
         
         let vc5 = UIViewController()
-        vc5.view.backgroundColor = UIColor.lightGrayColor()
+        vc5.view.backgroundColor = UIColor.lightGray
         
         let vc6 = UIViewController()
-        vc6.view.backgroundColor = UIColor.brownColor()
+        vc6.view.backgroundColor = UIColor.brown
         
         let vc7 = UIViewController()
-        vc7.view.backgroundColor = UIColor.orangeColor()
+        vc7.view.backgroundColor = UIColor.orange
         
         let vc8 = UIViewController()
-        vc8.view.backgroundColor = UIColor.blueColor()
+        vc8.view.backgroundColor = UIColor.blue
         
         let vc9 = UIViewController()
-        vc9.view.backgroundColor = UIColor.brownColor()
+        vc9.view.backgroundColor = UIColor.brown
         
         let vc10 = UIViewController()
-        vc10.view.backgroundColor = UIColor.orangeColor()
+        vc10.view.backgroundColor = UIColor.orange
         
         let vc11 = UIViewController()
-        vc11.view.backgroundColor = UIColor.blueColor()
+        vc11.view.backgroundColor = UIColor.blue
         return [vc1, vc2, vc3,vc4, vc5, vc6, vc7, vc8, vc9, vc10, vc11]
     }
     override func didReceiveMemoryWarning() {

@@ -14,7 +14,7 @@ private var ZJFooterKey: UInt8 = 0
 extension UIScrollView {
     public typealias RefreshHandler = () -> Void
     
-    private var zj_refreshHeader: RefreshView? {
+    fileprivate var zj_refreshHeader: RefreshView? {
         set {
             objc_setAssociatedObject(self, &ZJHeaderKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
@@ -23,7 +23,7 @@ extension UIScrollView {
             return objc_getAssociatedObject(self, &ZJHeaderKey) as? RefreshView
         }
     }
-    private var zj_refreshFooter: RefreshView? {
+    fileprivate var zj_refreshFooter: RefreshView? {
         set {
             objc_setAssociatedObject(self, &ZJFooterKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
@@ -34,7 +34,7 @@ extension UIScrollView {
     }
     
     ///
-    public func zj_addRefreshHeader<Animator where Animator: UIView, Animator: RefreshViewDelegate>(headerAnimator: Animator, refreshHandler: RefreshHandler ) {
+    public func zj_addRefreshHeader<Animator>(_ headerAnimator: Animator, refreshHandler: @escaping RefreshHandler ) where Animator: UIView, Animator: RefreshViewDelegate {
         if let header = zj_refreshHeader {
             header.removeFromSuperview()
         }
@@ -45,7 +45,7 @@ extension UIScrollView {
         
     }
     ///
-    public func zj_addRefreshFooter<Animator where Animator: UIView, Animator: RefreshViewDelegate>(footerAnimator: Animator, refreshHandler: RefreshHandler ) {
+    public func zj_addRefreshFooter<Animator>(_ footerAnimator: Animator, refreshHandler: @escaping RefreshHandler ) where Animator: UIView, Animator: RefreshViewDelegate {
         if let footer = zj_refreshFooter {
             footer.removeFromSuperview()
         }

@@ -38,7 +38,7 @@ class TestSelectedIndexController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor.whiteColor()
+        view.backgroundColor = UIColor.white
         
 //        navigationItem.leftBarButtonItem = setupBackBarItem()
 
@@ -46,10 +46,10 @@ class TestSelectedIndexController: UIViewController {
     
     func setupBackBarItem() -> UIBarButtonItem {
         let backBtn = UIButton(frame: CGRect(x: 0, y: 0, width: 200, height: 44))
-        backBtn.setTitle("返回选中其他页", forState: .Normal)
-        backBtn.titleLabel?.textAlignment = .Center
-        backBtn.setTitleColor(UIColor.blueColor(), forState: .Normal)
-        backBtn.addTarget(self, action: #selector(self.backBtnOnClick), forControlEvents: .TouchUpInside)
+        backBtn.setTitle("返回选中其他页", for: UIControlState())
+        backBtn.titleLabel?.textAlignment = .center
+        backBtn.setTitleColor(UIColor.blue, for: UIControlState())
+        backBtn.addTarget(self, action: #selector(self.backBtnOnClick), for: .touchUpInside)
         
         return UIBarButtonItem(customView: backBtn)
         

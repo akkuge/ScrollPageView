@@ -10,14 +10,14 @@ import UIKit
 
 // MARK: PageTableViewDelegate
 protocol PageViewDelegate: class {
-    func scrollViewIsScrolling(scrollView: UIScrollView)
+    func scrollViewIsScrolling(_ scrollView: UIScrollView)
 }
 
 
 class PageViewController: UIViewController, UIScrollViewDelegate {
     // 代理
     weak var delegate: PageViewDelegate?
-    func scrollViewDidScroll(scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
         delegate?.scrollViewIsScrolling(scrollView)
     }
 }

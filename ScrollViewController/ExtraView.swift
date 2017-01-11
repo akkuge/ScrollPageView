@@ -31,23 +31,23 @@ import UIKit
 
 class ExtraView: UIView {
     
-    typealias BtnAction = (btn: UIButton) -> Void
+    typealias BtnAction = (_ btn: UIButton) -> Void
     
     var editBtnAction: BtnAction?
     var finishBtnAction: BtnAction?
 
-    @IBAction func editBtnOnClick(sender: UIButton) {
-        editBtnAction?(btn: sender)
+    @IBAction func editBtnOnClick(_ sender: UIButton) {
+        editBtnAction?(sender)
     }
     
-    @IBAction func finishBtnOnClick(sender: UIButton) {
-        finishBtnAction?(btn: sender)
+    @IBAction func finishBtnOnClick(_ sender: UIButton) {
+        finishBtnAction?(sender)
 
     }
     
     
-    class func extraView(editBtnAction: BtnAction?, finishBtnAction: BtnAction?) -> ExtraView {
-        let extraView = NSBundle.mainBundle().loadNibNamed(String(self), owner: nil, options: nil).last as! ExtraView
+    class func extraView(_ editBtnAction: BtnAction?, finishBtnAction: BtnAction?) -> ExtraView {
+        let extraView = Bundle.main.loadNibNamed(String(describing: self), owner: nil, options: nil)?.last as! ExtraView
         extraView.editBtnAction = editBtnAction
         extraView.finishBtnAction = finishBtnAction
         return extraView

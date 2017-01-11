@@ -13,55 +13,55 @@ class GifAnimator: UIView {
     /// 闭包需要返回一个元组: 图片数组和gif动画每一帧的执行时间
     /// 一般需要设置loading状态的图片(必须), 作为加载的gif
     /// 和pullToRefresh状态的图片数组(可选择设置), 作为拖拽时的加载动画
-    typealias SetImagesForStateClosure = (refreshState: RefreshViewState) -> (images:[UIImage], duration:Double)?
+    typealias SetImagesForStateClosure = (_ refreshState: RefreshViewState) -> (images:[UIImage], duration:Double)?
     /// 为header或者footer的不同的state设置显示的文字
-    typealias SetDescriptionClosure = (refreshState: RefreshViewState, refreshType: RefreshViewType) -> String
+    typealias SetDescriptionClosure = (_ refreshState: RefreshViewState, _ refreshType: RefreshViewType) -> String
     /// 设置显示上次刷新时间的显示格式
-    typealias SetLastTimeClosure = (date: NSDate) -> String
+    typealias SetLastTimeClosure = (_ date: Date) -> String
     
     
     // MARK: - private property
     /// 显示上次刷新时间  可以外界隐藏和自定义字体颜色等
-    private(set) lazy var lastTimeLabel: UILabel = {
+    fileprivate(set) lazy var lastTimeLabel: UILabel = {
         let lastTimeLabel = UILabel()
-        lastTimeLabel.textColor = UIColor.lightGrayColor()
-        lastTimeLabel.backgroundColor = UIColor.clearColor()
-        lastTimeLabel.textAlignment = .Center
-        lastTimeLabel.font = UIFont.systemFontOfSize(14.0)
+        lastTimeLabel.textColor = UIColor.lightGray
+        lastTimeLabel.backgroundColor = UIColor.clear
+        lastTimeLabel.textAlignment = .center
+        lastTimeLabel.font = UIFont.systemFont(ofSize: 14.0)
         return lastTimeLabel
     }()
     
     /// 显示描述状态的文字  可以外界隐藏和自定义字体颜色等
-    private(set) lazy var descriptionLabel: UILabel = {
+    fileprivate(set) lazy var descriptionLabel: UILabel = {
         let descriptionLabel = UILabel()
-        descriptionLabel.textColor = UIColor.lightGrayColor()
-        descriptionLabel.backgroundColor = UIColor.clearColor()
-        descriptionLabel.textAlignment = .Center
-        descriptionLabel.font = UIFont.systemFontOfSize(14.0)
+        descriptionLabel.textColor = UIColor.lightGray
+        descriptionLabel.backgroundColor = UIColor.clear
+        descriptionLabel.textAlignment = .center
+        descriptionLabel.font = UIFont.systemFont(ofSize: 14.0)
         return descriptionLabel
     }()
     
     /// gif图片 -> 外界不支持自定义
-    private lazy var gifImageView: UIImageView = {
+    fileprivate lazy var gifImageView: UIImageView = {
         let gifImageView = UIImageView()
         gifImageView.clipsToBounds = true
-        gifImageView.contentMode = .ScaleAspectFit
+        gifImageView.contentMode = .scaleAspectFit
         return gifImageView
     }()
     /// 缓存图片
-    private var imagesDic = [RefreshViewState: (images:[UIImage], duration: Double)]()
+    fileprivate var imagesDic = [RefreshViewState: (images:[UIImage], duration: Double)]()
     
-    private var setupDesctiptionClosure: SetDescriptionClosure?
-    private var setupLastTimeClosure: SetLastTimeClosure?
+    fileprivate var setupDesctiptionClosure: SetDescriptionClosure?
+    fileprivate var setupLastTimeClosure: SetLastTimeClosure?
     /// 耗时操作
-    private lazy var formatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .ShortStyle
+    fileprivate lazy var formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
         return formatter
     }()
     /// 耗时操作
-    private lazy var calendar: NSCalendar = NSCalendar.currentCalendar()
-    private var setupImagesClosure: SetImagesForStateClosure?
+    fileprivate lazy var calendar: Calendar = Calendar.current
+    fileprivate var setupImagesClosure: SetImagesForStateClosure?
     
     // MARK: - public property
     
@@ -78,13 +78,13 @@ class GifAnimator: UIView {
     /// 闭包需要返回一个元组: 图片数组和gif动画每一帧的执行时间
     /// 一般需要设置loading状态的图片(必须), 作为加载的gif
     /// 和pullToRefresh状态的图片数组(可选择设置), 作为拖拽时的加载动画
-    func setupImagesForRefreshstate(closure: SetImagesForStateClosure?) {
+    func setupImagesForRefreshstate(_ closure: SetImagesForStateClosure?) {
         guard let imageClosure = closure else { return }
         
-        imagesDic[.normal] = imageClosure(refreshState: .normal)
-        imagesDic[.pullToRefresh] = imageClosure(refreshState: .pullToRefresh)
-        imagesDic[.releaseToFresh] = imageClosure(refreshState: .releaseToFresh)
-        imagesDic[.loading] = imageClosure(refreshState: .loading)
+        imagesDic[.normal] = imageClosure(.normal)
+        imagesDic[.pullToRefresh] = imageClosure(.pullToRefresh)
+        imagesDic[.releaseToFresh] = imageClosure(.releaseToFresh)
+        imagesDic[.loading] = imageClosure(.loading)
         
         for (_, result) in imagesDic {
             if result.images.count != 0 {
@@ -95,16 +95,16 @@ class GifAnimator: UIView {
     }
     
     
-    func setupDescriptionForState(closure: SetDescriptionClosure) {
+    func setupDescriptionForState(_ closure: @escaping SetDescriptionClosure) {
         setupDesctiptionClosure = closure
     }
     
-    func setupLastFreshTime(closure: SetLastTimeClosure) {
+    func setupLastFreshTime(_ closure: @escaping SetLastTimeClosure) {
         setupLastTimeClosure = closure
     }
     ///
-    class func gifAnimatorWithHeight(height: CGFloat) -> GifAnimator {
-        let gif = GifAnimator(frame: CGRect(x: 0, y: 0, width: UIScreen.mainScreen().bounds.width, height: height))
+    class func gifAnimatorWithHeight(_ height: CGFloat) -> GifAnimator {
+        let gif = GifAnimator(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: height))
         return gif
     }
     // MARK: - life cycle
@@ -125,8 +125,8 @@ class GifAnimator: UIView {
         gifImageView.frame = bounds
         /// setting height and width
         
-        if !descriptionLabel.hidden {
-            if lastTimeLabel.hidden {
+        if !descriptionLabel.isHidden {
+            if lastTimeLabel.isHidden {
                 descriptionLabel.sizeToFit()
                 descriptionLabel.center = center
                 gifImageView.frame.size.width = descriptionLabel.frame.minX - imageMagin
@@ -152,33 +152,33 @@ class GifAnimator: UIView {
 extension GifAnimator: RefreshViewDelegate {
     /// optional 两个可选的实现方法
     /// 允许在控件添加到scrollView之前的准备
-    func refreshViewDidPrepare(refreshView: RefreshView, refreshType: RefreshViewType) {
+    func refreshViewDidPrepare(_ refreshView: RefreshView, refreshType: RefreshViewType) {
         if refreshType == .header {
             descriptionLabel.text = "继续下拉刷新"
         }
         else {
             descriptionLabel.text = "继续上拉刷新"
-            lastTimeLabel.hidden = true
+            lastTimeLabel.isHidden = true
         }
         setupLastTime()
     }
     
-    func refreshDidBegin(refreshView: RefreshView, refreshViewType: RefreshViewType) {
+    func refreshDidBegin(_ refreshView: RefreshView, refreshViewType: RefreshViewType) {
         gifImageView.startAnimating()
     }
     
     /// 刷新结束状态, 这个时候应该关闭自定义的(动画)刷新
-    func refreshDidEnd(refreshView: RefreshView, refreshViewType: RefreshViewType) {
+    func refreshDidEnd(_ refreshView: RefreshView, refreshViewType: RefreshViewType) {
         gifImageView.stopAnimating()
     }
     
     /// 刷新状态变为新的状态, 这个时候可以自定义设置各个状态对应的属性
-    func refreshDidChangeState(refreshView: RefreshView, fromState: RefreshViewState, toState: RefreshViewState, refreshViewType: RefreshViewType) {
+    func refreshDidChangeState(_ refreshView: RefreshView, fromState: RefreshViewState, toState: RefreshViewState, refreshViewType: RefreshViewType) {
         
         setupDescriptionForState(toState, type: refreshViewType)
         switch toState {
         case .loading:
-            if gifImageView.isAnimating() {
+            if gifImageView.isAnimating {
                 gifImageView.stopAnimating()
             }
             guard let result = imagesDic[.loading] , let image = result.images.first else { return }
@@ -200,11 +200,11 @@ extension GifAnimator: RefreshViewDelegate {
     }
     
     /// 拖拽的进度, 可用于自定义实现拖拽过程中的动画
-    func refreshDidChangeProgress(refreshView: RefreshView, progress: CGFloat, refreshViewType: RefreshViewType) {
-        if gifImageView.isAnimating() {
+    func refreshDidChangeProgress(_ refreshView: RefreshView, progress: CGFloat, refreshViewType: RefreshViewType) {
+        if gifImageView.isAnimating {
             gifImageView.stopAnimating()
         }
-        guard let result = imagesDic[.pullToRefresh] where result.images.count != 0 else { return }
+        guard let result = imagesDic[.pullToRefresh], result.images.count != 0 else { return }
         if result.images.count == 1 {
             gifImageView.image = result.images.first
         }
@@ -216,8 +216,8 @@ extension GifAnimator: RefreshViewDelegate {
 }
 // MARK: - private helper
 extension GifAnimator {
-    private func setupLastTime() {
-        if lastTimeLabel.hidden { return }
+    fileprivate func setupLastTime() {
+        if lastTimeLabel.isHidden { return }
         else {
             guard let lastDate = lastRefreshTime else {
                 lastTimeLabel.text = "首次刷新"
@@ -225,12 +225,12 @@ extension GifAnimator {
             }
             
             if let closure = setupLastTimeClosure {
-                lastTimeLabel.text = closure(date:lastDate)
+                lastTimeLabel.text = closure(lastDate as Date)
                 setNeedsLayout()
             }
             else {
-                let lastComponent = calendar.components([.Day, .Year], fromDate: lastDate)
-                let currentComponent = calendar.components([.Day, .Year], fromDate: NSDate())
+                let lastComponent = (calendar as NSCalendar).components([.day, .year], from: lastDate as Date)
+                let currentComponent = (calendar as NSCalendar).components([.day, .year], from: Date())
                 var todayString = ""
                 if lastComponent.day == currentComponent.day {
                     formatter.dateFormat = "HH:mm"
@@ -243,18 +243,18 @@ extension GifAnimator {
                 else {
                     formatter.dateFormat = "yyyy-MM-dd HH:mm"
                 }
-                let timeString = formatter.stringFromDate(lastDate)
+                let timeString = formatter.string(from: lastDate as Date)
                 lastTimeLabel.text = "上次刷新时间:" + todayString + timeString
                 setNeedsLayout()
             }
         }
     }
     
-    private func setupDescriptionForState(state: RefreshViewState, type: RefreshViewType) {
-        if descriptionLabel.hidden { return }
+    fileprivate func setupDescriptionForState(_ state: RefreshViewState, type: RefreshViewType) {
+        if descriptionLabel.isHidden { return }
         else {
             if let closure = setupDesctiptionClosure {
-                descriptionLabel.text = closure(refreshState: state, refreshType: type)
+                descriptionLabel.text = closure(state, type)
                 setNeedsLayout()
                 
             }

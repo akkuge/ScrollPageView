@@ -33,12 +33,12 @@ extension UIViewController {
     /// parentViewController
     public weak var zj_scrollPageController: UIViewController? {
         get {
-            var superVc = self.parentViewController
+            var superVc = self.parent
             while superVc != nil {
                 if superVc! is ContentViewDelegate  {
                     break
                 }
-                superVc = superVc!.parentViewController
+                superVc = superVc!.parent
             }
             return superVc
         }

@@ -29,6 +29,30 @@
 //
 
 import UIKit
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 let segmentViewHeight: CGFloat = 44.0
 let naviBarHeight: CGFloat  = 64.0
@@ -37,7 +61,7 @@ let headViewHeight: CGFloat  = 200.0
 class CustomGestureTableView: UITableView {
     
     /// 返回true  ---- 能同时识别多个手势
-    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return (gestureRecognizer is UIPanGestureRecognizer) && (otherGestureRecognizer is UIPanGestureRecognizer)
     }
 }
@@ -56,7 +80,7 @@ class Vc7Controller: UIViewController {
         // 遮盖
         style.showCover = true
         // 遮盖颜色
-        style.coverBackgroundColor = UIColor.whiteColor()
+        style.coverBackgroundColor = UIColor.white
         
         // title正常状态颜色 使用RGB空间值
         style.normalTitleColor = UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 1.0)
@@ -72,7 +96,7 @@ class Vc7Controller: UIViewController {
             
         }
         
-        topView.backgroundColor = UIColor.lightGrayColor()
+        topView.backgroundColor = UIColor.lightGray
         return topView
         
     }()
@@ -95,7 +119,7 @@ class Vc7Controller: UIViewController {
     // 懒加载tableView, 注意如果是从storyBoard中连线过来的,那么注意设置contentView的高度有点不一样
     // 或者在滚动的时候需要渐变navigationBar的时候,需要注意相关的tableView的frame设置和contentInset的设置
     lazy var tableView: CustomGestureTableView = {[unowned self] in
-        let table = CustomGestureTableView(frame: CGRect(x: 0.0, y: naviBarHeight, width: self.view.bounds.size.width, height: self.view.bounds.size.height - naviBarHeight), style: .Plain)
+        let table = CustomGestureTableView(frame: CGRect(x: 0.0, y: naviBarHeight, width: self.view.bounds.size.width, height: self.view.bounds.size.height - naviBarHeight), style: .plain)
         table.delegate = self
         table.dataSource = self
         return table
@@ -126,7 +150,7 @@ class Vc7Controller: UIViewController {
         /// 添加下拉刷新
         tableView.zj_addRefreshHeader(normalRefresher) {
             /// 模拟延时
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2.0*Double(NSEC_PER_SEC))), dispatch_get_main_queue(), { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(2.0*Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: { [weak self] in
                 let strongSelf = self
                 guard let `self` = strongSelf else { return }
                 
@@ -142,7 +166,7 @@ class Vc7Controller: UIViewController {
         let titles = ["国内头条", "国际要闻", "趣事", "囧图", "明星八卦", "爱车", "国防要事", "科技频道", "手机专页"]
         var childVcs: [UIViewController] = []
         
-        for (index, title) in titles.enumerate() {
+        for (index, title) in titles.enumerated() {
             let childVc: PageViewController
             
             if index % 2 == 0 {
@@ -170,7 +194,7 @@ class Vc7Controller: UIViewController {
 }
 
 extension Vc7Controller: PageViewDelegate {
-    func scrollViewIsScrolling(scrollView: UIScrollView) {
+    func scrollViewIsScrolling(_ scrollView: UIScrollView) {
         /// 记录便于处理联动
         childScrollView = scrollView
 
@@ -188,7 +212,7 @@ extension Vc7Controller: PageViewDelegate {
 
 // MARK:- UIScrollViewDelegate 这里的代理可以监控tableView的滚动, 在滚动的时候就可以做一些事情, 比如使navigationBar渐变, 或者像简书一样改变头像的属性
 extension Vc7Controller: UIScrollViewDelegate {
-    func scrollViewDidScroll(scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if childScrollView?.contentOffset.y > 0 {
             tableView.contentOffset.y = headViewHeight
         }
@@ -199,12 +223,12 @@ extension Vc7Controller: UIScrollViewDelegate {
 // MARK:- UITableViewDataSource UITableViewDelegate
 extension Vc7Controller: UITableViewDelegate, UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .Default, reuseIdentifier: "cellId")
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "cellId")
         
         cell.contentView.subviews.forEach { (subview) in
             subview.removeFromSuperview()
@@ -215,7 +239,7 @@ extension Vc7Controller: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
     
-    func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         
         return topView
     }

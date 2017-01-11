@@ -30,56 +30,56 @@
 
 import UIKit
 
-public class ScrollSegmentView: UIView {
+open class ScrollSegmentView: UIView {
 
     // 1. 实现颜色填充效果
     
     
     /// 所有的title设置(style setting)
-    public var segmentStyle: SegmentStyle
+    open var segmentStyle: SegmentStyle
     
     /// 点击响应的closure(click title)
-    public var titleBtnOnClick:((label: UILabel, index: Int) -> Void)?
+    open var titleBtnOnClick:((_ label: UILabel, _ index: Int) -> Void)?
     /// 附加按钮点击响应(click extraBtn)
-    public var extraBtnOnClick: ((extraBtn: UIButton) -> Void)?
+    open var extraBtnOnClick: ((_ extraBtn: UIButton) -> Void)?
     /// self.bounds.size.width
-    private var currentWidth: CGFloat = 0
+    fileprivate var currentWidth: CGFloat = 0
 
     /// 遮盖x和文字x的间隙
-    private var xGap = 5
+    fileprivate var xGap = 5
     /// 遮盖宽度比文字宽度多的部分
-    private var wGap: Int {
+    fileprivate var wGap: Int {
         return 2 * xGap
     }
 
     /// 缓存标题labels( save labels )
-    private var labelsArray: [UILabel] = []
+    fileprivate var labelsArray: [UILabel] = []
     /// 记录当前选中的下标
-    private var currentIndex = 0
+    fileprivate var currentIndex = 0
     /// 记录上一个下标
-    private var oldIndex = 0
+    fileprivate var oldIndex = 0
     /// 用来缓存所有标题的宽度, 达到根据文字的字数和font自适应控件的宽度(save titles; width)
-    private var titlesWidthArray: [CGFloat] = []
+    fileprivate var titlesWidthArray: [CGFloat] = []
     /// 所有的标题
-    private var titles:[String]
+    fileprivate var titles:[String]
     
-    private lazy var scrollView: UIScrollView = {
+    fileprivate lazy var scrollView: UIScrollView = {
         let scrollV = UIScrollView()
         scrollV.showsHorizontalScrollIndicator = false
         scrollV.bounces = true
-        scrollV.pagingEnabled = false
+        scrollV.isPagingEnabled = false
         scrollV.scrollsToTop = false
         return scrollV
         
     }()
     
     /// 滚动条
-    private lazy var scrollLine: UIView? = {[unowned self] in
+    fileprivate lazy var scrollLine: UIView? = {[unowned self] in
         let line = UIView()
         return self.segmentStyle.showLine ? line : nil
     }()
     /// 遮盖
-    private lazy var coverLayer: UIView? = {[unowned self] in
+    fileprivate lazy var coverLayer: UIView? = {[unowned self] in
         
         if !self.segmentStyle.showCover {
             return nil
@@ -94,18 +94,18 @@ public class ScrollSegmentView: UIView {
     }()
     
     /// 附加的按钮
-    private lazy var extraButton: UIButton? = {[unowned self] in
+    fileprivate lazy var extraButton: UIButton? = {[unowned self] in
         if !self.segmentStyle.showExtraButton {
             return nil
         }
         let btn = UIButton()
-        btn.addTarget(self, action: #selector(self.extraBtnOnClick(_:)), forControlEvents: .TouchUpInside)
+        btn.addTarget(self, action: #selector(self.extraBtnOnClick(_:)), for: .touchUpInside)
         // 默认 图片名字
         let imageName = self.segmentStyle.extraBtnBackgroundImageName ?? ""
-        btn.setImage(UIImage(named:imageName), forState: .Normal)
-        btn.backgroundColor = UIColor.whiteColor()
+        btn.setImage(UIImage(named:imageName), for: UIControlState())
+        btn.backgroundColor = UIColor.white
         // 设置边缘的阴影效果
-        btn.layer.shadowColor = UIColor.whiteColor().CGColor
+        btn.layer.shadowColor = UIColor.white.cgColor
         btn.layer.shadowOffset = CGSize(width: -5, height: 0)
         btn.layer.shadowOpacity = 1
         return btn
@@ -113,7 +113,7 @@ public class ScrollSegmentView: UIView {
     
     
     /// 懒加载颜色的rgb变化值, 不要每次滚动时都计算
-    private lazy var rgbDelta: (deltaR: CGFloat, deltaG: CGFloat, deltaB: CGFloat) = {[unowned self] in
+    fileprivate lazy var rgbDelta: (deltaR: CGFloat, deltaG: CGFloat, deltaB: CGFloat) = {[unowned self] in
         let normalColorRgb = self.normalColorRgb
         let selectedTitleColorRgb = self.selectedTitleColorRgb
         let deltaR = normalColorRgb.r - selectedTitleColorRgb.r
@@ -124,7 +124,7 @@ public class ScrollSegmentView: UIView {
     }()
     
     /// 懒加载颜色的rgb变化值, 不要每次滚动时都计算
-    private lazy var normalColorRgb: (r: CGFloat, g: CGFloat, b: CGFloat) = {
+    fileprivate lazy var normalColorRgb: (r: CGFloat, g: CGFloat, b: CGFloat) = {
         
         if let normalRgb = self.getColorRGB(self.segmentStyle.normalTitleColor) {
             return normalRgb
@@ -134,7 +134,7 @@ public class ScrollSegmentView: UIView {
         
     }()
     
-    private lazy var selectedTitleColorRgb: (r: CGFloat, g: CGFloat, b: CGFloat) =  {
+    fileprivate lazy var selectedTitleColorRgb: (r: CGFloat, g: CGFloat, b: CGFloat) =  {
         
         if let selectedRgb = self.getColorRGB(self.segmentStyle.selectedTitleColor) {
             return selectedRgb
@@ -145,7 +145,7 @@ public class ScrollSegmentView: UIView {
     }()
     
     //FIXME: 如果提供的不是RGB空间的颜色值就可能crash
-    private func getColorRGB(color: UIColor) -> (r: CGFloat, g: CGFloat, b: CGFloat)? {
+    fileprivate func getColorRGB(_ color: UIColor) -> (r: CGFloat, g: CGFloat, b: CGFloat)? {
 //        let colorString = String(color)
 //        let colorArr = colorString.componentsSeparatedByString(" ")
 //        print(colorString)
@@ -154,12 +154,12 @@ public class ScrollSegmentView: UIView {
 //        }
         
         
-        let numOfComponents = CGColorGetNumberOfComponents(color.CGColor)
+        let numOfComponents = color.cgColor.numberOfComponents
         if numOfComponents == 4 {
-            let componemts = CGColorGetComponents(color.CGColor)
+            let componemts = color.cgColor.components
 //            print("\(componemts[0]) --- \(componemts[1]) ---- \(componemts[2]) --- \(componemts[3])")
 
-            return (r: componemts[0], g: componemts[1], b: componemts[2])
+            return (r: (componemts?[0])!, g: (componemts?[1])!, b: (componemts?[2])!)
 
         }
         return nil
@@ -167,17 +167,17 @@ public class ScrollSegmentView: UIView {
         
     }
     /// 背景图片
-    public var backgroundImage: UIImage? = nil {
+    open var backgroundImage: UIImage? = nil {
         didSet {
             // 在设置了背景图片的时候才添加imageView
             if let image = backgroundImage {
                 backgroundImageView.image = image
-                insertSubview(backgroundImageView, atIndex: 0)
+                insertSubview(backgroundImageView, at: 0)
 
             }
         }
     }
-    private lazy var backgroundImageView: UIImageView = {[unowned self] in
+    fileprivate lazy var backgroundImageView: UIImageView = {[unowned self] in
         let imageView = UIImageView(frame: self.bounds)
         return imageView
     }()
@@ -207,7 +207,7 @@ public class ScrollSegmentView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func titleLabelOnClick(tapGes: UITapGestureRecognizer) {
+    func titleLabelOnClick(_ tapGes: UITapGestureRecognizer) {
         guard let currentLabel = tapGes.view as? CustomLabel else { return }
         currentIndex = currentLabel.tag
         
@@ -215,8 +215,8 @@ public class ScrollSegmentView: UIView {
 
     }
 
-    func extraBtnOnClick(btn: UIButton) {
-        extraBtnOnClick?(extraBtn: btn)
+    func extraBtnOnClick(_ btn: UIButton) {
+        extraBtnOnClick?(btn)
     }
 
     deinit {
@@ -229,7 +229,7 @@ public class ScrollSegmentView: UIView {
 //MARK: - public helper
 extension ScrollSegmentView {
     ///  对外界暴露设置选中的下标的方法 可以改变设置下标滚动后是否有动画切换效果
-    public func selectedIndex(selectedIndex: Int, animated: Bool) {
+    public func selectedIndex(_ selectedIndex: Int, animated: Bool) {
         assert(!(selectedIndex < 0 || selectedIndex >= titles.count), "设置的下标不合法!!")
         
         if selectedIndex < 0 || selectedIndex >= titles.count {
@@ -245,7 +245,7 @@ extension ScrollSegmentView {
     }
     
     // 暴露给外界来刷新标题的显示
-    public func reloadTitlesWithNewTitles(titles: [String]) {
+    public func reloadTitlesWithNewTitles(_ titles: [String]) {
         // 移除所有的scrollView子视图
         scrollView.subviews.forEach { (subview) in
             subview.removeFromSuperview()
@@ -265,21 +265,21 @@ extension ScrollSegmentView {
 
 //MARK: - private helper
 extension ScrollSegmentView {
-    private func setupTitles() {
-        for (index, title) in titles.enumerate() {
+    fileprivate func setupTitles() {
+        for (index, title) in titles.enumerated() {
             
-            let label = CustomLabel(frame: CGRectZero)
+            let label = CustomLabel(frame: CGRect.zero)
             label.tag = index
             label.text = title
             label.textColor = segmentStyle.normalTitleColor
             label.font = segmentStyle.titleFont
-            label.textAlignment = .Center
-            label.userInteractionEnabled = true
+            label.textAlignment = .center
+            label.isUserInteractionEnabled = true
             
             let tapGes = UITapGestureRecognizer(target: self, action: #selector(self.titleLabelOnClick(_:)))
             label.addGestureRecognizer(tapGes)
             
-            let size = (title as NSString).boundingRectWithSize(CGSizeMake(CGFloat(MAXFLOAT), 0.0), options: .UsesLineFragmentOrigin, attributes: [NSFontAttributeName: label.font], context: nil)
+            let size = (title as NSString).boundingRect(with: CGSize(width: CGFloat(MAXFLOAT), height: 0.0), options: .usesLineFragmentOrigin, attributes: [NSFontAttributeName: label.font], context: nil)
             
             titlesWidthArray.append(size.width)
             labelsArray.append(label)
@@ -287,7 +287,7 @@ extension ScrollSegmentView {
         }
     }
     
-    private func setupUI() {
+    fileprivate func setupUI() {
         
         // 设置extra按钮
         setupScrollViewAndExtraBtn()
@@ -299,14 +299,14 @@ extension ScrollSegmentView {
         
         if segmentStyle.scrollTitle { // 设置滚动区域
             if let lastLabel = labelsArray.last {
-                scrollView.contentSize = CGSize(width: CGRectGetMaxX(lastLabel.frame) + segmentStyle.titleMargin, height: 0)
+                scrollView.contentSize = CGSize(width: lastLabel.frame.maxX + segmentStyle.titleMargin, height: 0)
                 
             }
         }
         
     }
     
-    private func setupScrollViewAndExtraBtn() {
+    fileprivate func setupScrollViewAndExtraBtn() {
         currentWidth = bounds.size.width
         let extraBtnW: CGFloat = 44.0
         let extraBtnY: CGFloat = 5.0
@@ -315,7 +315,7 @@ extension ScrollSegmentView {
         extraButton?.frame = CGRect(x: scrollW, y: extraBtnY, width: extraBtnW, height: bounds.size.height - 2*extraBtnY)
     }
     // 先设置label的位置
-    private func setUpLabelsPosition() {
+    fileprivate func setUpLabelsPosition() {
         var titleX: CGFloat = 0.0
         let titleY: CGFloat = 0.0
         var titleW: CGFloat = 0.0
@@ -324,7 +324,7 @@ extension ScrollSegmentView {
         if !segmentStyle.scrollTitle {// 标题不能滚动, 平分宽度
             titleW = currentWidth / CGFloat(titles.count)
             
-            for (index, label) in labelsArray.enumerate() {
+            for (index, label) in labelsArray.enumerated() {
                 
                 titleX = CGFloat(index) * titleW
                 
@@ -335,13 +335,13 @@ extension ScrollSegmentView {
             
         } else {
             
-            for (index, label) in labelsArray.enumerate() {
+            for (index, label) in labelsArray.enumerated() {
                 titleW = titlesWidthArray[index]
                 
                 titleX = segmentStyle.titleMargin
                 if index != 0 {
                     let lastLabel = labelsArray[index - 1]
-                    titleX = CGRectGetMaxX(lastLabel.frame) + segmentStyle.titleMargin
+                    titleX = lastLabel.frame.maxX + segmentStyle.titleMargin
                 }
                 label.frame = CGRect(x: titleX, y: titleY, width: titleW, height: titleH)
                 
@@ -363,7 +363,7 @@ extension ScrollSegmentView {
     }
     
     // 再设置滚动条和cover的位置
-    private func setupScrollLineAndCover() {
+    fileprivate func setupScrollLineAndCover() {
         if let line = scrollLine {
             line.backgroundColor = segmentStyle.scrollLineColor
             scrollView.addSubview(line)
@@ -371,7 +371,7 @@ extension ScrollSegmentView {
         }
         if let cover = coverLayer {
             cover.backgroundColor = segmentStyle.coverBackgroundColor
-            scrollView.insertSubview(cover, atIndex: 0)
+            scrollView.insertSubview(cover, at: 0)
             
         }
         let coverX = labelsArray[0].frame.origin.x
@@ -395,7 +395,7 @@ extension ScrollSegmentView {
 
 extension ScrollSegmentView {
     // 自动或者手动点击按钮的时候调整UI
-    public func adjustUIWhenBtnOnClickWithAnimate(animated: Bool) {
+    public func adjustUIWhenBtnOnClickWithAnimate(_ animated: Bool) {
         // 重复点击时的相应, 这里没有处理, 可以传递给外界来处理
         if currentIndex == oldIndex { return }
         
@@ -405,7 +405,7 @@ extension ScrollSegmentView {
         adjustTitleOffSetToCurrentIndex(currentIndex)
         
         let animatedTime = animated ? 0.3 : 0.0
-        UIView.animateWithDuration(animatedTime) {[unowned self] in
+        UIView.animate(withDuration: animatedTime, animations: {[unowned self] in
             
             // 设置文字颜色
             oldLabel.textColor = self.segmentStyle.normalTitleColor
@@ -434,14 +434,14 @@ extension ScrollSegmentView {
                 self.coverLayer?.frame.size.width = currentLabel.frame.size.width
             }
             
-        }
+        }) 
         oldIndex = currentIndex
         
-        titleBtnOnClick?(label: currentLabel, index: currentIndex)
+        titleBtnOnClick?(currentLabel, currentIndex)
     }
     
     // 手动滚动时需要提供动画效果
-    public func adjustUIWithProgress(progress: CGFloat,  oldIndex: Int, currentIndex: Int) {
+    public func adjustUIWithProgress(_ progress: CGFloat,  oldIndex: Int, currentIndex: Int) {
         // 记录当前的currentIndex以便于在点击的时候处理
         self.oldIndex = currentIndex
         
@@ -494,12 +494,12 @@ extension ScrollSegmentView {
         
     }
     // 居中显示title
-    public func adjustTitleOffSetToCurrentIndex(currentIndex: Int) {
+    public func adjustTitleOffSetToCurrentIndex(_ currentIndex: Int) {
         
         let currentLabel = labelsArray[currentIndex]
         
-        labelsArray.enumerate().forEach {[unowned self] in
-            if $0.index != currentIndex {
+        labelsArray.enumerated().forEach {[unowned self] in
+            if $0.offset != currentIndex {
                 $0.element.textColor = self.segmentStyle.normalTitleColor
             }
         }
@@ -527,7 +527,7 @@ extension ScrollSegmentView {
         if !segmentStyle.gradualChangeTitleColor {
             
             
-            for (index, label) in labelsArray.enumerate() {
+            for (index, label) in labelsArray.enumerated() {
                 if index == currentIndex {
                     label.textColor = segmentStyle.selectedTitleColor
                     
@@ -546,11 +546,11 @@ extension ScrollSegmentView {
 
 
 
-public class CustomLabel: UILabel {
+open class CustomLabel: UILabel {
     /// 用来记录当前label的缩放比例
-    public var currentTransformSx:CGFloat = 1.0 {
+    open var currentTransformSx:CGFloat = 1.0 {
         didSet {
-            transform = CGAffineTransformMakeScale(currentTransformSx, currentTransformSx)
+            transform = CGAffineTransform(scaleX: currentTransformSx, y: currentTransformSx)
         }
     }
 }

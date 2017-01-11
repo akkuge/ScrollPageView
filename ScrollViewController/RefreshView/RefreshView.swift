@@ -29,40 +29,40 @@ public protocol RefreshViewDelegate {
     /// 是否刷新完成后自动隐藏 默认为false
     var isAutomaticlyHidden: Bool { get }
     /// 上次刷新时间, 有默认赋值和返回
-    var lastRefreshTime: NSDate? { get set }
+    var lastRefreshTime: Date? { get set }
     /// repuired 三个必须实现的代理方法
     
     /// 开始进入刷新(loading)状态, 这个时候应该开启自定义的(动画)刷新
-    func refreshDidBegin(refreshView: RefreshView, refreshViewType: RefreshViewType)
+    func refreshDidBegin(_ refreshView: RefreshView, refreshViewType: RefreshViewType)
     
     /// 刷新结束状态, 这个时候应该关闭自定义的(动画)刷新
-    func refreshDidEnd(refreshView: RefreshView, refreshViewType: RefreshViewType)
+    func refreshDidEnd(_ refreshView: RefreshView, refreshViewType: RefreshViewType)
     
     /// 刷新状态变为新的状态, 这个时候可以自定义设置各个状态对应的属性
-    func refreshDidChangeState(refreshView: RefreshView, fromState: RefreshViewState, toState: RefreshViewState, refreshViewType: RefreshViewType)
+    func refreshDidChangeState(_ refreshView: RefreshView, fromState: RefreshViewState, toState: RefreshViewState, refreshViewType: RefreshViewType)
     
     /// optional 两个可选的实现方法
     /// 允许在控件添加到scrollView之前的准备
-    func refreshViewDidPrepare(refreshView: RefreshView, refreshType: RefreshViewType)
+    func refreshViewDidPrepare(_ refreshView: RefreshView, refreshType: RefreshViewType)
     
     /// 拖拽的进度, 可用于自定义实现拖拽过程中的动画
-    func refreshDidChangeProgress(refreshView: RefreshView, progress: CGFloat, refreshViewType: RefreshViewType)
+    func refreshDidChangeProgress(_ refreshView: RefreshView, progress: CGFloat, refreshViewType: RefreshViewType)
     
 }
 
 /// default doing
 extension RefreshViewDelegate {
-    public func refreshViewDidPrepare(refreshView: RefreshView, refreshType: RefreshViewType) { }
-    public func refreshDidChangeProgress(refreshView: RefreshView, progress: CGFloat, refreshViewType: RefreshViewType) { }
+    public func refreshViewDidPrepare(_ refreshView: RefreshView, refreshType: RefreshViewType) { }
+    public func refreshDidChangeProgress(_ refreshView: RefreshView, progress: CGFloat, refreshViewType: RefreshViewType) { }
     public var isAutomaticlyHidden: Bool { return false }
     
-    public var lastRefreshTime: NSDate? {
+    public var lastRefreshTime: Date? {
         get {
-            return NSUserDefaults.standardUserDefaults().objectForKey(lastRefreshTimeKey ?? RefreshView.ConstantValue.commonRefreshTimeKey) as? NSDate
+            return UserDefaults.standard.object(forKey: lastRefreshTimeKey ?? RefreshView.ConstantValue.commonRefreshTimeKey) as? Date
         }
         set {
-            NSUserDefaults.standardUserDefaults().setObject(newValue, forKey: lastRefreshTimeKey ?? RefreshView.ConstantValue.commonRefreshTimeKey)
-            NSUserDefaults.standardUserDefaults().synchronize()
+            UserDefaults.standard.set(newValue, forKey: lastRefreshTimeKey ?? RefreshView.ConstantValue.commonRefreshTimeKey)
+            UserDefaults.standard.synchronize()
         }
     }
     
@@ -72,18 +72,18 @@ extension RefreshViewDelegate {
 }
 
 
-public class RefreshView: UIView {
+open class RefreshView: UIView {
     /// KVO Constant
     struct ConstantValue {
         static var RefreshViewContext: UInt8 = 0
         static let ScrollViewContentOffsetPath = "contentOffset"
         static let ScrollViewContentSizePath = "contentSize"
         static let commonRefreshTimeKey = "ZJCommonRefreshTimeKey"
-        static let LastRefreshTimeKey = NSProcessInfo().globallyUniqueString
+        static let LastRefreshTimeKey = ProcessInfo().globallyUniqueString
         
     }
     ///
-    typealias RefreshHandler = Void -> Void
+    typealias RefreshHandler = (Void) -> Void
     // MARK: - internal property
     var canBegin = false {
         didSet {
@@ -97,17 +97,17 @@ public class RefreshView: UIView {
     }
     
     // MARK: - private property
-    private var refreshViewState: RefreshViewState = .normal {
+    fileprivate var refreshViewState: RefreshViewState = .normal {
         didSet {
             if refreshViewState == .normal {
-                hidden = refreshAnimator.isAutomaticlyHidden
+                isHidden = refreshAnimator.isAutomaticlyHidden
             }
-            else { hidden = false }
+            else { isHidden = false }
             
             if refreshViewState != oldValue {
                 if refreshViewState == .loading {
 //                    print(refreshAnimator.lastRefreshTimeKey)
-                    refreshAnimator.lastRefreshTime = NSDate()
+                    refreshAnimator.lastRefreshTime = Date()
                     
                 }
                 refreshAnimator.refreshDidChangeState(self, fromState: oldValue, toState: refreshViewState, refreshViewType: refreshViewType)
@@ -117,49 +117,49 @@ public class RefreshView: UIView {
     }
     
     /// action handler
-    private let refreshHandler: RefreshHandler
+    fileprivate let refreshHandler: RefreshHandler
     /// handler refresh !! must be UIView which conform to RefreshViewDelegate protocol
-    private var refreshAnimator: RefreshViewDelegate
+    fileprivate var refreshAnimator: RefreshViewDelegate
     /// header or footer
-    private var refreshViewType: RefreshViewType = .header
+    fileprivate var refreshViewType: RefreshViewType = .header
     /// to distinguish if is refreshing
-    private var isRefreshing = false
+    fileprivate var isRefreshing = false
     /// to distinguish if dragging begins
-    private var isGestureBegin = false
-    private var offPartHeight = CGFloat(0)
-    private var beginAnimatingOffsetY: CGFloat = 0
+    fileprivate var isGestureBegin = false
+    fileprivate var offPartHeight = CGFloat(0)
+    fileprivate var beginAnimatingOffsetY: CGFloat = 0
     /// 标注结束的动画是否执行完成
-    private var isAnimating = false
+    fileprivate var isAnimating = false
     /// store it to reset scrollView' after animating
-    private var scrollViewOriginalValue:(bounces: Bool, contentInset: UIEdgeInsets, contentOffset: CGPoint) = (false, UIEdgeInsets(), CGPoint())
+    fileprivate var scrollViewOriginalValue:(bounces: Bool, contentInset: UIEdgeInsets, contentOffset: CGPoint) = (false, UIEdgeInsets(), CGPoint())
     /// superView
-    private weak var scrollView: UIScrollView? {
+    fileprivate weak var scrollView: UIScrollView? {
         return self.superview as? UIScrollView
     }
     
     //MARK: - life cycle
     ///
-    init<Animator:UIView where Animator: RefreshViewDelegate>(frame: CGRect, refreshType: RefreshViewType, refreshAnimator: Animator, refreshHandler: RefreshHandler) {
+    init<Animator:UIView>(frame: CGRect, refreshType: RefreshViewType, refreshAnimator: Animator, refreshHandler: @escaping RefreshHandler) where Animator: RefreshViewDelegate {
         self.refreshViewType = refreshType
         self.refreshAnimator = refreshAnimator
         self.refreshHandler = refreshHandler
         super.init(frame: frame)
         addSubview(refreshAnimator)
         /// needed
-        autoresizingMask = .FlexibleWidth
+        autoresizingMask = .flexibleWidth
         addConstraint()
         /// animator can prepare to do something
         self.refreshAnimator.refreshViewDidPrepare(self, refreshType: self.refreshViewType)
         ///
-        hidden = refreshAnimator.isAutomaticlyHidden
+        isHidden = refreshAnimator.isAutomaticlyHidden
     }
     ///
-    private func addConstraint() {
+    fileprivate func addConstraint() {
         guard let refreshAnimatorView = refreshAnimator as? UIView else { return }
-        let leading = NSLayoutConstraint(item: refreshAnimatorView, attribute: .Leading, relatedBy: .Equal, toItem: self, attribute: .Leading, multiplier: 1.0, constant: 0.0)
-        let top = NSLayoutConstraint(item: refreshAnimatorView, attribute: .Top, relatedBy: .Equal, toItem: self, attribute: .Top, multiplier: 1.0, constant: 0.0)
-        let trailing = NSLayoutConstraint(item: refreshAnimatorView, attribute: .Trailing, relatedBy: .Equal, toItem: self, attribute: .Trailing, multiplier: 1.0, constant: 0.0)
-        let bottom = NSLayoutConstraint(item: refreshAnimatorView, attribute: .Bottom, relatedBy: .Equal, toItem: self, attribute: .Bottom, multiplier: 1.0, constant: 0.0)
+        let leading = NSLayoutConstraint(item: refreshAnimatorView, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1.0, constant: 0.0)
+        let top = NSLayoutConstraint(item: refreshAnimatorView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1.0, constant: 0.0)
+        let trailing = NSLayoutConstraint(item: refreshAnimatorView, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1.0, constant: 0.0)
+        let bottom = NSLayoutConstraint(item: refreshAnimatorView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 0.0)
         
         refreshAnimatorView.translatesAutoresizingMaskIntoConstraints = false
         addConstraints([leading, top, trailing, bottom])
@@ -173,8 +173,8 @@ public class RefreshView: UIView {
         removeObserverOf(scrollView)
     }
     
-    override public func willMoveToSuperview(newSuperview: UIView?) {
-        super.willMoveToSuperview(newSuperview)
+    override open func willMove(toSuperview newSuperview: UIView?) {
+        super.willMove(toSuperview: newSuperview)
         
         removeObserverOf(scrollView)
         
@@ -193,16 +193,16 @@ public class RefreshView: UIView {
 
 extension RefreshView {
     
-    private func startAnimation() {
+    fileprivate func startAnimation() {
         guard let validScrollView = scrollView else { return }
         validScrollView.bounces = false
         isRefreshing = true
-        if hidden { hidden = false }
+        if isHidden { isHidden = false }
         /// may update UI
-        dispatch_async(dispatch_get_main_queue(), {[weak self] in
+        DispatchQueue.main.async(execute: {[weak self] in
             guard let validSelf = self else { return }
             
-            UIView.animateWithDuration(0.25, animations: {
+            UIView.animate(withDuration: 0.25, animations: {
                 if validSelf.refreshViewType == .header {
                     validScrollView.contentInset.top = validSelf.scrollViewOriginalValue.contentInset.top + validSelf.bounds.height
                 } else {
@@ -227,17 +227,17 @@ extension RefreshView {
         
     }
     
-    private func stopAnimation() {
+    fileprivate func stopAnimation() {
         guard let validScrollView = scrollView else { return }
         if !isRefreshing { return }
         isRefreshing = false
         isAnimating = true
 //        print("endAnimation ---    \(scrollViewOriginalValue.contentInset.top)")
 
-        dispatch_async(dispatch_get_main_queue(), {[weak self] in
+        DispatchQueue.main.async(execute: {[weak self] in
             guard let validSelf = self else { return }
             
-            UIView.animateWithDuration(0.25, animations: {
+            UIView.animate(withDuration: 0.25, animations: {
                 if validSelf.refreshViewType == .header {
                     validScrollView.contentInset.top = validSelf.scrollViewOriginalValue.contentInset.top
                 } else {
@@ -265,15 +265,14 @@ extension RefreshView {
 // MARK: - KVO
 extension RefreshView {
     
-    override public func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if context == &ConstantValue.RefreshViewContext {
             
             if keyPath == ConstantValue.ScrollViewContentSizePath {
                 
                 guard let validScrollView = scrollView,
-                    let oldSize = change?[NSKeyValueChangeOldKey]?.CGSizeValue(),
-                    let newSize = change?[NSKeyValueChangeNewKey]?.CGSizeValue()
-                    where oldSize != newSize &&
+                    let oldSize = (change?[NSKeyValueChangeKey.oldKey] as AnyObject).cgSizeValue,
+                    let newSize = (change?[NSKeyValueChangeKey.newKey] as AnyObject).cgSizeValue, oldSize != newSize &&
                         refreshViewType == .footer
                     else { return }
                 
@@ -287,7 +286,7 @@ extension RefreshView {
             }
             else if keyPath == ConstantValue.ScrollViewContentOffsetPath {
                 
-                if let validScrollView = scrollView where object as? UIScrollView == validScrollView {
+                if let validScrollView = scrollView, object as? UIScrollView == validScrollView {
                     
                     if refreshViewType == .header {
                         adjustHeaderWhenScrollViewIsScrolling(validScrollView)
@@ -297,21 +296,21 @@ extension RefreshView {
                 }
             }
             else {
-                super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+                super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
                 
             }
             
         } else {
-            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
     
-    private func adjustFooterWhenScrollViewIsScrolling(scrollView: UIScrollView) {
+    fileprivate func adjustFooterWhenScrollViewIsScrolling(_ scrollView: UIScrollView) {
         
         if isRefreshing {/**正在刷新直接返回*/ return }
         
         scrollViewOriginalValue.contentInset = scrollView.contentInset
-        if scrollView.panGestureRecognizer.state == .Began {// 手势拖拽才能进入下拉状态
+        if scrollView.panGestureRecognizer.state == .began {// 手势拖拽才能进入下拉状态
             isGestureBegin = true
             /// 超出屏幕的内容高度
             offPartHeight = frame.origin.y - scrollView.bounds.height
@@ -331,7 +330,7 @@ extension RefreshView {
         
     }
     
-    private func adjustHeaderWhenScrollViewIsScrolling(scrollView: UIScrollView) {
+    fileprivate func adjustHeaderWhenScrollViewIsScrolling(_ scrollView: UIScrollView) {
         if isRefreshing {/**正在刷新直接返回*/
             /// 需要处理这个时候滚动时sectionHeader悬停的问题
             /// 参照MJRefresh
@@ -352,7 +351,7 @@ extension RefreshView {
         if isAnimating {/**stop动画还未执行完成*/ return }
         scrollViewOriginalValue.contentInset = scrollView.contentInset
         
-        if scrollView.panGestureRecognizer.state == .Began {// 手势拖拽才能进入下拉状态
+        if scrollView.panGestureRecognizer.state == .began {// 手势拖拽才能进入下拉状态
             isGestureBegin = true
             return
         }
@@ -370,11 +369,11 @@ extension RefreshView {
         adjustRefreshViewWithProgress(progress, scrollView: scrollView)
     }
     
-    private func adjustRefreshViewWithProgress(progress: CGFloat, scrollView: UIScrollView) {
+    fileprivate func adjustRefreshViewWithProgress(_ progress: CGFloat, scrollView: UIScrollView) {
         
 //        print(progress)
         
-        if scrollView.tracking {
+        if scrollView.isTracking {
             
             if progress >= 1.0 {
                 refreshViewState = .releaseToFresh
@@ -402,18 +401,18 @@ extension RefreshView {
     }
     
     /// 显示在屏幕上的内容高度
-    private func heightOfContentOnScreenOfScrollView(scrollView: UIScrollView) -> CGFloat {
+    fileprivate func heightOfContentOnScreenOfScrollView(_ scrollView: UIScrollView) -> CGFloat {
         return scrollView.bounds.height - scrollViewOriginalValue.contentInset.top - scrollViewOriginalValue.contentInset.bottom
     }
     
     
-    private func addObserverOf(scrollView: UIScrollView?) {
-        scrollView?.addObserver(self, forKeyPath: ConstantValue.ScrollViewContentOffsetPath, options: .Initial, context: &ConstantValue.RefreshViewContext)
-        scrollView?.addObserver(self, forKeyPath: ConstantValue.ScrollViewContentSizePath, options: [.Old, .New], context: &ConstantValue.RefreshViewContext)
+    fileprivate func addObserverOf(_ scrollView: UIScrollView?) {
+        scrollView?.addObserver(self, forKeyPath: ConstantValue.ScrollViewContentOffsetPath, options: .initial, context: &ConstantValue.RefreshViewContext)
+        scrollView?.addObserver(self, forKeyPath: ConstantValue.ScrollViewContentSizePath, options: [.old, .new], context: &ConstantValue.RefreshViewContext)
         
     }
     
-    private func removeObserverOf(scrollView: UIScrollView?) {
+    fileprivate func removeObserverOf(_ scrollView: UIScrollView?) {
         scrollView?.removeObserver(self, forKeyPath: ConstantValue.ScrollViewContentOffsetPath, context: &ConstantValue.RefreshViewContext)
         scrollView?.removeObserver(self, forKeyPath: ConstantValue.ScrollViewContentSizePath, context: &ConstantValue.RefreshViewContext)
         

@@ -48,7 +48,7 @@ class Vc5Controller: UIViewController {
         // 颜色渐变
         style.gradualChangeTitleColor = true
         // 遮盖颜色
-        style.coverBackgroundColor = UIColor.lightGrayColor()
+        style.coverBackgroundColor = UIColor.lightGray
         
         
         let scroll = ScrollPageView(frame: CGRect(x: 0, y: 64, width: view.bounds.size.width, height: view.bounds.size.height - 64), segmentStyle: style, titles: titles, childVcs: setChildVcs(), parentViewController: self)
@@ -56,16 +56,16 @@ class Vc5Controller: UIViewController {
     }
     
     func setChildVcs() -> [UIViewController] {
-        let vc1 = storyboard!.instantiateViewControllerWithIdentifier("test")
+        let vc1 = storyboard!.instantiateViewController(withIdentifier: "test")
         
         let vc2 = UIViewController()
-        vc2.view.backgroundColor = UIColor.greenColor()
+        vc2.view.backgroundColor = UIColor.green
         
         let vc3 = UIViewController()
-        vc3.view.backgroundColor = UIColor.redColor()
+        vc3.view.backgroundColor = UIColor.red
         
         let vc4 = UIViewController()
-        vc4.view.backgroundColor = UIColor.yellowColor()
+        vc4.view.backgroundColor = UIColor.yellow
 
         return [vc1, vc2, vc3,vc4]
     }

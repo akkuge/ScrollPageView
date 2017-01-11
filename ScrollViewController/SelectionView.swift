@@ -32,9 +32,9 @@ import UIKit
 class HeadView: UICollectionReusableView {
     lazy var titleLabel: UILabel = {
         let label = UILabel(frame: self.bounds)
-        label.textColor = UIColor.blackColor()
+        label.textColor = UIColor.black
         label.adjustsFontSizeToFitWidth = true
-        label.font = UIFont.systemFontOfSize(16.0)
+        label.font = UIFont.systemFont(ofSize: 16.0)
         return label
     }()
     
@@ -55,11 +55,11 @@ class HeadView: UICollectionReusableView {
 }
 
 extension SelectionView: UICollectionViewDelegate, UICollectionViewDataSource {
-    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
         return onlyShowTheFirstSection ? 1 : 2
     }
     
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if section == 0 {
             return selectedTitles.count
         } else {
@@ -68,10 +68,10 @@ extension SelectionView: UICollectionViewDelegate, UICollectionViewDataSource {
     }
     
     
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("cellID", forIndexPath: indexPath) as! SelectionCollectionViewCell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellID", for: indexPath) as! SelectionCollectionViewCell
         
-        cell.state = onlyShowTheFirstSection ? .Selected : .Normal
+        cell.state = onlyShowTheFirstSection ? .selected : .normal
         // 避免重用cell出现action出错
         cell.deleteAction = nil
         cell.selectedAction = nil
@@ -80,7 +80,7 @@ extension SelectionView: UICollectionViewDelegate, UICollectionViewDataSource {
             cell.title = selectedTitles[indexPath.row]
             cell.deleteAction = {[unowned self](btn: UIButton) in
                 self.unselectedTitles.append(self.selectedTitles[indexPath.row])
-                self.selectedTitles.removeAtIndex(indexPath.row)
+                self.selectedTitles.remove(at: indexPath.row)
                 self.collectionView.reloadData()
             }
 
@@ -88,7 +88,7 @@ extension SelectionView: UICollectionViewDelegate, UICollectionViewDataSource {
             cell.title = unselectedTitles[indexPath.row]
             cell.selectedAction = {[unowned self](btn: UIButton) in
                 self.selectedTitles.append(self.unselectedTitles[indexPath.row])
-                self.unselectedTitles.removeAtIndex(indexPath.row)
+                self.unselectedTitles.remove(at: indexPath.row)
                 self.collectionView.reloadData()
             }
         }
@@ -97,8 +97,8 @@ extension SelectionView: UICollectionViewDelegate, UICollectionViewDataSource {
     }
 
     
-    func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView {
-        let headView = collectionView.dequeueReusableSupplementaryViewOfKind(kind, withReuseIdentifier: "HeadView", forIndexPath: indexPath) as! HeadView
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let headView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HeadView", for: indexPath) as! HeadView
         if indexPath.section == 1 {
             headView.title = "   点击添加更多栏目"
         }
@@ -109,9 +109,9 @@ extension SelectionView: UICollectionViewDelegate, UICollectionViewDataSource {
 }
 
 extension SelectionView: UICollectionViewDelegateFlowLayout {
-    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         if section == 0 {
-            return CGSizeZero
+            return CGSize.zero
         }
         return CGSize(width: 300, height: 44)
     }
@@ -120,34 +120,34 @@ extension SelectionView: UICollectionViewDelegateFlowLayout {
 
 class SelectionView: UIView {
     
-    typealias FinishAction = (selectedTitles: [String]) -> Void
-    private var snapedImageView: UIView!
-    private var currentIndexPath:NSIndexPath?
+    typealias FinishAction = (_ selectedTitles: [String]) -> Void
+    fileprivate var snapedImageView: UIView!
+    fileprivate var currentIndexPath:IndexPath?
     /// 正在动画中不要接受新的手势
-    private var canRecieveTouch = true
+    fileprivate var canRecieveTouch = true
     // 用于记录手势的位置和cell frame的最初的x和y的差距, 以用于同步更新位置
-    private var deltaSize: CGSize!
-    private let headViewHeight: CGFloat = 36.0
+    fileprivate var deltaSize: CGSize!
+    fileprivate let headViewHeight: CGFloat = 36.0
     
-    private var unselectedTitles: [String] = []
-    private var selectedTitles: [String] = []
+    fileprivate var unselectedTitles: [String] = []
+    fileprivate var selectedTitles: [String] = []
     
     var finishAction: FinishAction?
-    private lazy var panGes: UIPanGestureRecognizer! = {
+    fileprivate lazy var panGes: UIPanGestureRecognizer! = {
         let panGes = UIPanGestureRecognizer(target: self, action: #selector(self.pan(_:)))
-        panGes.enabled = false
+        panGes.isEnabled = false
         return panGes
 
     }()
 
     /// 用于只显示第一组
-    private var onlyShowTheFirstSection = false
-    private var showFrame: CGRect!
-    private var hideFrame: CGRect! {
+    fileprivate var onlyShowTheFirstSection = false
+    fileprivate var showFrame: CGRect!
+    fileprivate var hideFrame: CGRect! {
         return CGRect(x: 0.0, y: -showFrame.size.height, width: showFrame.size.width, height: showFrame.size.height)
     }
     
-    private var longPressedAction: (() -> Void)?
+    fileprivate var longPressedAction: (() -> Void)?
     
     init(frame: CGRect, selectedTitles: [String], unselectedTitles: [String], finishAction: FinishAction?) {
         self.selectedTitles = selectedTitles
@@ -156,7 +156,7 @@ class SelectionView: UIView {
         
         super.init(frame: frame)
         showFrame = frame
-        backgroundColor = UIColor.brownColor()
+        backgroundColor = UIColor.brown
         addSubview(collectionView)
         addHead()
     }
@@ -167,13 +167,13 @@ class SelectionView: UIView {
     
     func addHead() {
         let extraView = ExtraView.extraView({[unowned self] (editBtn) in // 编辑
-                editBtn.selected = !editBtn.selected
-                self.onlyShowTheFirstSection = editBtn.selected
-                self.panGes.enabled = editBtn.selected
+                editBtn.isSelected = !editBtn.isSelected
+                self.onlyShowTheFirstSection = editBtn.isSelected
+                self.panGes.isEnabled = editBtn.isSelected
 
                 self.collectionView.reloadData()
             }) {[unowned self] (finishBtn) in // 完成
-                self.finishAction?(selectedTitles: self.selectedTitles)
+                self.finishAction?(self.selectedTitles)
                 self.hide()
         }
         
@@ -188,7 +188,7 @@ class SelectionView: UIView {
     
     lazy var collectionView: UICollectionView = {
         let flow = UICollectionViewFlowLayout()
-        flow.scrollDirection = .Vertical
+        flow.scrollDirection = .vertical
         
         flow.itemSize = CGSize(width: (self.bounds.size.width - 5.0 * 10.0) / 4.0, height: 38.0)
         flow.sectionInset = UIEdgeInsets(top: 0.0, left: 10.0, bottom: 0.0, right: 10.0)
@@ -196,40 +196,40 @@ class SelectionView: UIView {
         flow.minimumInteritemSpacing = 10.0
         
         let collectionView = UICollectionView(frame: CGRect(x: 0.0, y: self.headViewHeight, width: self.bounds.size.width, height: self.bounds.size.height - self.headViewHeight), collectionViewLayout: flow)
-        collectionView.backgroundColor = UIColor.whiteColor()
+        collectionView.backgroundColor = UIColor.white
         collectionView.delegate = self
         collectionView.dataSource = self
-        collectionView.registerClass(HeadView.self, forSupplementaryViewOfKind: "UICollectionElementKindSectionHeader", withReuseIdentifier: "HeadView")
-        collectionView.registerNib(UINib(nibName : String(SelectionCollectionViewCell), bundle :nil), forCellWithReuseIdentifier: "cellID")
+        collectionView.register(HeadView.self, forSupplementaryViewOfKind: "UICollectionElementKindSectionHeader", withReuseIdentifier: "HeadView")
+        collectionView.register(UINib(nibName : String(describing: SelectionCollectionViewCell.self), bundle :nil), forCellWithReuseIdentifier: "cellID")
         collectionView.addGestureRecognizer(self.panGes)
         return collectionView
     }()
     
-    func pan(ges: UIPanGestureRecognizer) {
+    func pan(_ ges: UIPanGestureRecognizer) {
         guard canRecieveTouch else { return }
 
-        let location = ges.locationInView(self.collectionView)
+        let location = ges.location(in: self.collectionView)
         // 当手指的位置不在collectionView的cell范围内时为nil
-        let notSureIndexPath = self.collectionView.indexPathForItemAtPoint(location)
+        let notSureIndexPath = self.collectionView.indexPathForItem(at: location)
         switch ges.state {
-        case .Began:
+        case .began:
             if let indexPath = notSureIndexPath { // 获取到的indexPath是有效的, 可以放心使用
                 // 不要移动第一个 和只移动第一个section
                 if indexPath.row == 0 || indexPath.section != 0 { return }
                 
                 currentIndexPath = indexPath
-                let cell = collectionView.cellForItemAtIndexPath(indexPath)!
+                let cell = collectionView.cellForItem(at: indexPath)!
                 snapedImageView = getTheCellSnap(cell)
                 
                 deltaSize = CGSize(width: location.x - cell.frame.origin.x, height: location.y - cell.frame.origin.y)
                 
                 snapedImageView.center = cell.center
-                snapedImageView.transform = CGAffineTransformMakeScale(1.1, 1.1)
+                snapedImageView.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
                 cell.alpha = 0.0
         
                 collectionView.addSubview(snapedImageView)
             }
-        case .Changed:
+        case .changed:
             if snapedImageView == nil { return }
             // 同步改变位置
 //            snapedImageView.center = location
@@ -255,23 +255,23 @@ class SelectionView: UIView {
                         }
                     }
 
-                    collectionView.moveItemAtIndexPath(oldIndexPath, toIndexPath: newIndexPath)
+                    collectionView.moveItem(at: oldIndexPath, to: newIndexPath)
                     
 
-                    let cell = collectionView.cellForItemAtIndexPath(newIndexPath)
+                    let cell = collectionView.cellForItem(at: newIndexPath)
                     cell?.alpha = 0.0
                     currentIndexPath = newIndexPath
                 }
                 
             }
             
-        case .Ended :
+        case .ended :
             
             if let oldIndexPath = currentIndexPath {
-                let cell = collectionView.cellForItemAtIndexPath(oldIndexPath)!
+                let cell = collectionView.cellForItem(at: oldIndexPath)!
 
-                UIView.animateWithDuration(0.25, animations: {[unowned self] in
-                        self.snapedImageView.transform = CGAffineTransformIdentity
+                UIView.animate(withDuration: 0.25, animations: {[unowned self] in
+                        self.snapedImageView.transform = CGAffineTransform.identity
                         self.snapedImageView.frame = cell.frame
                         self.canRecieveTouch = false
                     }, completion: {[unowned self] (_) in
@@ -294,17 +294,17 @@ class SelectionView: UIView {
 
     }
 
-    func longPressed(ges: UILongPressGestureRecognizer) {
+    func longPressed(_ ges: UILongPressGestureRecognizer) {
         onlyShowTheFirstSection = true
-        ges.enabled = false
+        ges.isEnabled = false
         collectionView.reloadData()
     }
 
     // 截图
-    func getTheCellSnap(targetView: UIView) -> UIImageView {
+    func getTheCellSnap(_ targetView: UIView) -> UIImageView {
         UIGraphicsBeginImageContextWithOptions(targetView.bounds.size, false, 0.0)
         
-        targetView.layer.renderInContext(UIGraphicsGetCurrentContext()!)
+        targetView.layer.render(in: UIGraphicsGetCurrentContext()!)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         let gottenImageView = UIImageView(image: image)
@@ -315,30 +315,30 @@ class SelectionView: UIView {
     func show() {
         
         frame = hideFrame
-        UIView.animateWithDuration(0.3, animations: {[unowned self] in
+        UIView.animate(withDuration: 0.3, animations: {[unowned self] in
             self.frame = self.showFrame
             
-            }) { (_) in
+            }, completion: { (_) in
                 
-        }
+        }) 
         
     }
     
     func hide() {
         
-        UIView.animateWithDuration(0.3, animations: {
+        UIView.animate(withDuration: 0.3, animations: {
             self.frame = self.hideFrame
             
-        }) {[unowned self] (_) in
+        }, completion: {[unowned self] (_) in
             
             self.removeFromSuperview()
-        }
+        }) 
     }
 
 }
 
 extension Array {
-    mutating func zj_exchangeObjectAtIndex(index: Int, withObjectAtIndex newIndex: Int) {
+    mutating func zj_exchangeObjectAtIndex(_ index: Int, withObjectAtIndex newIndex: Int) {
         let temp = self[index]
         self[index] = self[newIndex]
         self[newIndex] = temp
