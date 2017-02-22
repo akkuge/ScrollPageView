@@ -44,7 +44,7 @@ open class ScrollPageView: UIView {
     fileprivate var contentView: ContentView!
     fileprivate var titlesArray: [String] = []
     /// 所有的子控制器
-    fileprivate var childVcs: [UIViewController] = []
+    public var childVcs: [UIViewController] = []
     // 这里使用weak避免循环引用
     fileprivate weak var parentViewController: UIViewController?
 
